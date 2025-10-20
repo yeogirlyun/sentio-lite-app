@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Period Selector</title>
+    <style>
+        button { margin: 10px; padding: 10px; }
+        button.active { background: blue; color: white; }
+        #output { margin: 20px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>Test Period Selector</h1>
+
+    <div>
+        <button class="active" onclick="testPeriod(this, 'daily')">Daily</button>
+        <button onclick="testPeriod(this, 'weekly')">Weekly</button>
+        <button onclick="testPeriod(this, 'monthly')">Monthly</button>
+    </div>
+
+    <div id="output"></div>
+
+    <script>
+        function testPeriod(button, period) {
+            console.log('testPeriod called with:', period);
+
+            // Remove active from all buttons
+            document.querySelectorAll('button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Add active to clicked button
+            button.classList.add('active');
+
+            // Update output
+            document.getElementById('output').innerHTML = `
+                <div>Selected: <strong>${period}</strong></div>
+                <div>Button classes: ${button.className}</div>
+                <div>Time: ${new Date().toLocaleTimeString()}</div>
+            `;
+
+            console.log('✓ Updated to:', period);
+        }
+    </script>
+</body>
+</html>

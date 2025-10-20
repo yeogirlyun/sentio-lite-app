@@ -1,0 +1,2308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentio Lite - Watch Our AI Trade</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f7;
+            color: #1d1d1f;
+        }
+
+        .phone-container {
+            width: 390px;
+            height: 844px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            position: relative;
+            /* Ensure all absolute children are contained */
+        }
+
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            color: white;
+            font-size: 13px;
+        }
+
+        .screen {
+            display: none;
+            height: calc(844px - 44px - 83px);
+            overflow-y: auto;
+            background: #f5f5f7;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(0); }
+            to { transform: translateY(100%); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header .subtitle {
+            font-size: 13px;
+            opacity: 0.95;
+        }
+
+        .header .education-notice {
+            font-size: 13px;
+            font-weight: 700;
+            color: #ff9966;
+            margin-top: 2px;
+        }
+
+        .date-picker {
+            background: white;
+            margin: 12px 16px;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .date-picker label {
+            font-size: 12px;
+            color: #86868b;
+            font-weight: 600;
+        }
+
+        .date-picker input {
+            border: 1px solid #e5e5e7;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1d1d1f;
+            background: #f5f5f7;
+        }
+
+        .date-nav {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .date-nav button {
+            background: #667eea;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .date-nav button:active {
+            transform: scale(0.95);
+            background: #764ba2;
+        }
+
+        .portfolio-card {
+            background: white;
+            margin: 16px;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .portfolio-label {
+            font-size: 13px;
+            color: #86868b;
+            margin-bottom: 8px;
+        }
+
+        .portfolio-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1d1d1f;
+        }
+
+        .portfolio-change {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .portfolio-change.positive {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .portfolio-change.negative {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 24px 16px 12px 16px;
+            color: #1d1d1f;
+        }
+
+        .signal-card {
+            background: white;
+            margin: 12px 16px;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .signal-card:active {
+            transform: scale(0.98);
+        }
+
+        .signal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .symbol {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1d1d1f;
+        }
+
+        .symbol-name {
+            font-size: 11px;
+            color: #86868b;
+            margin-top: 2px;
+        }
+
+        .signal-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .signal-badge.buy {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .signal-badge.hold {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .signal-badge.no-signal {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .price-info {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .price-info div {
+            flex: 1;
+        }
+
+        .price-label {
+            font-size: 11px;
+            color: #86868b;
+            margin-bottom: 4px;
+        }
+
+        .price-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .ai-reason {
+            background: #f5f5f7;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #1d1d1f;
+            line-height: 1.4;
+            margin-top: 8px;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 4px;
+            background: #e5e5e7;
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        .chart-placeholder {
+            background: #f5f5f7;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px;
+            text-align: center;
+        }
+
+        .chart-img {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(to bottom, #e5e5e7 0%, #f5f5f7 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #86868b;
+            font-size: 13px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-line {
+            position: absolute;
+            bottom: 20%;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: #667eea;
+        }
+
+        .chart-line::before,
+        .chart-line::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #667eea;
+            border-radius: 50%;
+        }
+
+        .chart-line::before {
+            left: 0;
+            top: -2px;
+        }
+
+        .chart-line::after {
+            right: 0;
+            top: -20px;
+        }
+
+        .detail-section {
+            background: white;
+            margin: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .detail-item {
+            text-align: left;
+        }
+
+        .detail-label {
+            font-size: 11px;
+            color: #86868b;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 16px;
+            border-radius: 8px;
+            font-size: 11px;
+            color: #856404;
+            line-height: 1.5;
+        }
+
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 83px;
+            background: white;
+            border-top: 1px solid #e5e5e7;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: 20px;
+        }
+
+        .nav-item {
+            text-align: center;
+            cursor: pointer;
+            padding: 8px 16px;
+            transition: opacity 0.2s;
+        }
+
+        .nav-item:active {
+            opacity: 0.6;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            color: #86868b;
+        }
+
+        .nav-item.active .nav-label {
+            color: #667eea;
+        }
+
+        .position-card {
+            background: white;
+            margin: 12px 16px;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+        }
+
+        .position-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .pnl {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .pnl.positive {
+            color: #155724;
+        }
+
+        .pnl.negative {
+            color: #721c24;
+        }
+
+        .trade-card {
+            background: white;
+            margin: 12px 16px;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+        }
+
+        .trade-time {
+            font-size: 11px;
+            color: #86868b;
+            margin-bottom: 8px;
+        }
+
+        .back-button {
+            position: absolute;
+            left: 16px;
+            top: 20px;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .info-badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: flex-end;
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-height: 90%;
+            border-radius: 20px 20px 0 0;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-in-out;
+        }
+
+        .modal-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 16px;
+            border-bottom: 1px solid #e5e5e7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .modal-close {
+            background: #e5e5e7;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-close:active {
+            transform: scale(0.9);
+            background: #d1d1d6;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1d1d1f;
+        }
+
+        /* Technical Details Expandable */
+        .tech-details {
+            background: #f5f5f7;
+            margin: 12px 0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .tech-details-header {
+            padding: 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .tech-details-header:active {
+            background: #e5e5e7;
+        }
+
+        .tech-details-header h4 {
+            font-size: 13px;
+            color: #1d1d1f;
+            font-weight: 600;
+        }
+
+        .tech-details-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+
+        .tech-details-content.expanded {
+            max-height: 500px;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 12px;
+            background: white;
+        }
+
+        .tech-item {
+            background: #f5f5f7;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .tech-label {
+            font-size: 10px;
+            color: #86868b;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .tech-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .tech-value.bullish {
+            color: #155724;
+        }
+
+        .tech-value.bearish {
+            color: #721c24;
+        }
+
+        .tech-value.neutral {
+            color: #856404;
+        }
+
+        /* Exit Badge */
+        .exit-badge {
+            background: #ffc107;
+            color: #856404;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .exit-reason {
+            background: #fff3cd;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin-top: 8px;
+        }
+
+        .exit-reason strong {
+            color: #856404;
+            font-size: 12px;
+        }
+
+        .exit-reason p {
+            color: #856404;
+            font-size: 12px;
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        /* Performance Chart */
+        .performance-selector {
+            display: flex;
+            gap: 8px;
+            margin: 12px 16px;
+            padding: 4px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .performance-selector button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            color: #86868b;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .performance-selector button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .performance-selector button:active {
+            transform: scale(0.95);
+        }
+
+        /* Candlestick Chart */
+        .candlestick-chart {
+            background: white;
+            padding: 20px;
+            margin: 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        /* Pulse animation for live updates */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #34c759;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>📶 🔋</span>
+        </div>
+
+        <!-- Dashboard Screen -->
+        <div class="screen active" id="dashboard">
+            <div class="header">
+                <h1>Sentio Lite</h1>
+                <div class="subtitle"><span class="live-indicator"></span>Watch Our AI Trade Live</div>
+                <div class="education-notice">For Educational Purposes Only</div>
+            </div>
+
+            <div class="date-picker">
+                <label>VIEW DATE:</label>
+                <div class="date-nav">
+                    <button onclick="changeDate(-1)">◀</button>
+                    <input type="date" id="viewDate" value="2025-10-17" onchange="loadDateData()">
+                    <button onclick="changeDate(1)">▶</button>
+                </div>
+            </div>
+
+            <div class="portfolio-card">
+                <div class="portfolio-label">Our Portfolio Value (<span id="dateLabel">Oct 17, 2025</span>)</div>
+                <div class="portfolio-value" id="portfolioValue">$101,248.50</div>
+                <div class="portfolio-change positive" id="portfolioChange">
+                    ↑ +$1,248.50 (+1.25%) Today
+                </div>
+                <div style="font-size: 11px; color: #86868b; margin-top: 12px;">
+                    Started with $100,000 • <span id="updateTime">Last updated: 10:30 AM</span>
+                </div>
+            </div>
+
+            <div class="disclaimer">
+                ⚠️ <strong>INFORMATION ONLY:</strong> You are viewing our proprietary AI trading system. This is NOT investment advice. Observe and learn - we are not liable for any trading decisions.
+            </div>
+
+            <div class="section-title">📊 All 12 Symbols Monitored by Our AI</div>
+
+            <!-- TQQQ - BUY Signal -->
+            <div class="signal-card" onclick="showDetail('TQQQ')">
+                <div class="signal-header">
+                    <div>
+                        <div class="symbol">TQQQ</div>
+                        <div class="symbol-name">Nasdaq 3x Bull</div>
+                    </div>
+                    <div class="signal-badge buy">STRONG BUY</div>
+                </div>
+                <div class="price-info">
+                    <div>
+                        <div class="price-label">Current Price</div>
+                        <div class="price-value">$102.45</div>
+                    </div>
+                    <div>
+                        <div class="price-label">AI Confidence</div>
+                        <div class="price-value" style="color: #667eea;">87%</div>
+                    </div>
+                </div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" style="width: 87%"></div>
+                </div>
+                <div class="ai-reason">
+                    <strong>Why Our AI Bought:</strong> Oversold conditions detected. Mean reversion setup with 3.96% profit target. Entry executed at $102.45.
+                </div>
+
+                <div class="tech-details">
+                    <div class="tech-details-header" onclick="event.stopPropagation(); toggleTechDetails(this)">
+                        <h4>📈 Technical Analysis Details</h4>
+                        <span>▼</span>
+                    </div>
+                    <div class="tech-details-content">
+                        <div class="tech-grid">
+                            <div class="tech-item">
+                                <div class="tech-label">RSI (14)</div>
+                                <div class="tech-value bullish">34.2</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">BB Proximity</div>
+                                <div class="tech-value bullish">0.95</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">Volume Ratio</div>
+                                <div class="tech-value bullish">1.8x</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">σ from MA(20)</div>
+                                <div class="tech-value bullish">-2.3σ</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">1-bar Signal</div>
+                                <div class="tech-value bullish">+2.45</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">5-bar Signal</div>
+                                <div class="tech-value bullish">+1.89</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">10-bar Signal</div>
+                                <div class="tech-value bullish">+1.52</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">Rotation Δ</div>
+                                <div class="tech-value bullish">+0.34</div>
+                            </div>
+                        </div>
+                        <div style="padding: 12px; background: #d4edda; margin: 12px; border-radius: 8px; font-size: 11px; color: #155724;">
+                            <strong>✓ All Entry Criteria Met:</strong> Multi-horizon signals aligned, oversold RSI, high volume, Bollinger Band support, positive rotation strength
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SQQQ - NO SIGNAL -->
+            <div class="signal-card">
+                <div class="signal-header">
+                    <div>
+                        <div class="symbol">SQQQ</div>
+                        <div class="symbol-name">Nasdaq 3x Bear</div>
+                    </div>
+                    <div class="signal-badge no-signal">NO SIGNAL</div>
+                </div>
+                <div class="ai-reason">
+                    <strong>Why No Trade:</strong> Inverse correlation to TQQQ. Already long TQQQ - no conflicting positions.
+                </div>
+            </div>
+
+            <!-- SPXL - NO SIGNAL -->
+            <div class="signal-card">
+                <div class="signal-header">
+                    <div>
+                        <div class="symbol">SPXL</div>
+                        <div class="symbol-name">S&P 500 3x Bull</div>
+                    </div>
+                    <div class="signal-badge no-signal">NO SIGNAL</div>
+                </div>
+                <div class="price-info">
+                    <div>
+                        <div class="price-label">Current Price</div>
+                        <div class="price-value">$158.32</div>
+                    </div>
+                    <div>
+                        <div class="price-label">AI Confidence</div>
+                        <div class="price-value" style="color: #856404;">42%</div>
+                    </div>
+                </div>
+                <div class="ai-reason">
+                    <strong>Why No Trade:</strong> Insufficient mean reversion signal. Price within normal range. Confidence below 65% threshold.
+                </div>
+
+                <div class="tech-details">
+                    <div class="tech-details-header" onclick="event.stopPropagation(); toggleTechDetails(this)">
+                        <h4>📊 Technical Data (Not Trading)</h4>
+                        <span>▼</span>
+                    </div>
+                    <div class="tech-details-content">
+                        <div class="tech-grid">
+                            <div class="tech-item">
+                                <div class="tech-label">RSI (14)</div>
+                                <div class="tech-value neutral">54.8</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">BB Proximity</div>
+                                <div class="tech-value neutral">0.52</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">Volume Ratio</div>
+                                <div class="tech-value neutral">0.9x</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">σ from MA(20)</div>
+                                <div class="tech-value neutral">-0.4σ</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">1-bar Signal</div>
+                                <div class="tech-value neutral">+0.52</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">5-bar Signal</div>
+                                <div class="tech-value bearish">-0.18</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">10-bar Signal</div>
+                                <div class="tech-value bullish">+0.34</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">Rotation Δ</div>
+                                <div class="tech-value neutral">-0.08</div>
+                            </div>
+                        </div>
+                        <div style="padding: 12px; background: #fff3cd; margin: 12px; border-radius: 8px; font-size: 11px; color: #856404;">
+                            <strong>✗ Entry Criteria Not Met:</strong>
+                            <ul style="margin: 8px 0 0 16px; line-height: 1.6;">
+                                <li>RSI neutral (need <35 or >65)</li>
+                                <li>Multi-horizon signals not aligned (1-bar bullish, 5-bar bearish)</li>
+                                <li>Price only -0.4σ from MA (need ±2σ for mean reversion)</li>
+                                <li>Volume below average (need >1.2x)</li>
+                                <li>Overall confidence 42% (threshold: 65%)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SPXU - NO SIGNAL -->
+            <div class="signal-card">
+                <div class="signal-header">
+                    <div>
+                        <div class="symbol">SPXU</div>
+                        <div class="symbol-name">S&P 500 3x Bear</div>
+                    </div>
+                    <div class="signal-badge no-signal">NO SIGNAL</div>
+                </div>
+                <div class="ai-reason">
+                    <strong>Why No Trade:</strong> Low volatility. RSI neutral at 54. Waiting for clearer setup.
+                </div>
+            </div>
+
+            <!-- TNA - NO SIGNAL -->
+            <div class="signal-card">
+                <div class="signal-header">
+                    <div>
+                        <div class="symbol">TNA</div>
+                        <div class="symbol-name">Russell 2000 3x Bull</div>
+                    </div>
+                    <div class="signal-badge no-signal">NO SIGNAL</div>
+                </div>
+                <div class="ai-reason">
+                    <strong>Why No Trade:</strong> Conflicting multi-horizon signals. 1-bar bullish but 5-bar bearish. Waiting for alignment.
+                </div>
+            </div>
+
+            <!-- TZA - NO SIGNAL -->
+            <div class="signal-card">
+                <div class="signal-header">
+                    <div>
+                        <div class="symbol">TZA</div>
+                        <div class="symbol-name">Russell 2000 3x Bear</div>
+                    </div>
+                    <div class="signal-badge no-signal">NO SIGNAL</div>
+                </div>
+                <div class="ai-reason">
+                    <strong>Why No Trade:</strong> Volume too low. Need 1.5x average volume for reliable signal.
+                </div>
+            </div>
+
+            <!-- FAS - NO SIGNAL -->
+            <div class="signal-card">
+                <div class="signal-header">
+                    <div>
+                        <div class="symbol">FAS</div>
+                        <div class="symbol-name">Financials 3x Bull</div>
+                    </div>
+                    <div class="signal-badge no-signal">NO SIGNAL</div>
+                </div>
+                <div class="ai-reason">
+                    <strong>Why No Trade:</strong> Max positions reached (3/3). Waiting for existing trades to close.
+                </div>
+            </div>
+
+            <!-- FAZ - NO SIGNAL -->
+            <div class="signal-card">
+                <div class="signal-header">
+                    <div>
+                        <div class="symbol">FAZ</div>
+                        <div class="symbol-name">Financials 3x Bear</div>
+                    </div>
+                    <div class="signal-badge no-signal">NO SIGNAL</div>
+                </div>
+                <div class="ai-reason">
+                    <strong>Why No Trade:</strong> Bollinger Band squeeze detected. Waiting for breakout direction.
+                </div>
+            </div>
+
+            <!-- SOXL - NO SIGNAL -->
+            <div class="signal-card">
+                <div class="signal-header">
+                    <div>
+                        <div class="symbol">SOXL</div>
+                        <div class="symbol-name">Semiconductors 3x Bull</div>
+                    </div>
+                    <div class="signal-badge no-signal">NO SIGNAL</div>
+                </div>
+                <div class="ai-reason">
+                    <strong>Why No Trade:</strong> Overbought RSI at 72. Mean reversion favors shorts, but bull trend too strong.
+                </div>
+            </div>
+
+            <!-- SOXS - NO SIGNAL -->
+            <div class="signal-card">
+                <div class="signal-header">
+                    <div>
+                        <div class="symbol">SOXS</div>
+                        <div class="symbol-name">Semiconductors 3x Bear</div>
+                    </div>
+                    <div class="signal-badge no-signal">NO SIGNAL</div>
+                </div>
+                <div class="ai-reason">
+                    <strong>Why No Trade:</strong> Strong bearish setup but confirmation indicator missing. Need volume surge.
+                </div>
+            </div>
+
+            <!-- UVXY - HOLD -->
+            <div class="signal-card" onclick="showDetail('UVXY')">
+                <div class="signal-header">
+                    <div>
+                        <div class="symbol">UVXY</div>
+                        <div class="symbol-name">VIX 2x Volatility</div>
+                    </div>
+                    <div class="signal-badge hold">HOLDING</div>
+                </div>
+                <div class="price-info">
+                    <div>
+                        <div class="price-label">Entry Price</div>
+                        <div class="price-value">$34.20</div>
+                    </div>
+                    <div>
+                        <div class="price-label">Current P&L</div>
+                        <div class="price-value" style="color: #155724;">+$245 (+2.1%)</div>
+                    </div>
+                </div>
+                <div class="ai-reason">
+                    <strong>Our Position:</strong> Holding 350 shares. Approaching profit target (+3.5%). AI monitoring for exit signal.
+                </div>
+            </div>
+
+            <!-- SVIX - NO SIGNAL -->
+            <div class="signal-card">
+                <div class="signal-header">
+                    <div>
+                        <div class="symbol">SVIX</div>
+                        <div class="symbol-name">VIX Inverse ETF</div>
+                    </div>
+                    <div class="signal-badge no-signal">NO SIGNAL</div>
+                </div>
+                <div class="ai-reason">
+                    <strong>Why No Trade:</strong> Already long UVXY. SVIX would be conflicting inverse position.
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Symbol Detail Screen -->
+        <div class="screen" id="detail">
+            <div class="header">
+                <div class="back-button" onclick="showDashboard()">◀</div>
+                <h1 id="detail-symbol">TQQQ</h1>
+                <div class="subtitle">Nasdaq 3x Bull ETF • Last updated: 10:30 AM</div>
+            </div>
+
+            <div class="detail-section">
+                <div class="info-badge">📊 OUR AI'S ANALYSIS</div>
+                <h3 style="margin-bottom: 12px;">Friday, Oct 17, 2025 - Intraday Chart</h3>
+                <div class="chart-img">
+                    <div style="position: relative; width: 100%; height: 100%; background: white; border-radius: 8px; padding: 20px;">
+                        <svg width="100%" height="100%" viewBox="0 0 300 150" style="overflow: visible;">
+                            <!-- Grid lines -->
+                            <line x1="0" y1="30" x2="300" y2="30" stroke="#e5e5e7" stroke-width="1"/>
+                            <line x1="0" y1="60" x2="300" y2="60" stroke="#e5e5e7" stroke-width="1"/>
+                            <line x1="0" y1="90" x2="300" y2="90" stroke="#e5e5e7" stroke-width="1"/>
+                            <line x1="0" y1="120" x2="300" y2="120" stroke="#e5e5e7" stroke-width="1"/>
+
+                            <!-- Price line (Friday 9:30 AM to 10:30 AM) -->
+                            <polyline points="0,80 30,75 60,70 90,85 120,90 150,80 180,75 210,65 240,55 270,50 300,45"
+                                      fill="none" stroke="#667eea" stroke-width="2"/>
+
+                            <!-- Current price marker -->
+                            <circle cx="300" cy="45" r="4" fill="#667eea"/>
+                            <text x="250" y="35" font-size="10" fill="#667eea" font-weight="600">$102.45</text>
+
+                            <!-- Time labels -->
+                            <text x="5" y="145" font-size="9" fill="#86868b">9:30</text>
+                            <text x="130" y="145" font-size="9" fill="#86868b">10:00</text>
+                            <text x="260" y="145" font-size="9" fill="#86868b">10:30</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <div class="info-badge">🎯 OUR TRADE</div>
+                <h3>Strong Buy Signal - Position Opened</h3>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Entry Price</div>
+                        <div class="detail-value">$102.45</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Shares</div>
+                        <div class="detail-value">295</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">AI Confidence</div>
+                        <div class="detail-value" style="color: #667eea;">87%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Profit Target</div>
+                        <div class="detail-value" style="color: #155724;">+3.96%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Stop Loss</div>
+                        <div class="detail-value" style="color: #721c24;">-1.12%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Position Size</div>
+                        <div class="detail-value">$30,223</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <div class="info-badge">🤖 AI REASONING</div>
+                <h3>Why Our AI Entered This Trade</h3>
+                <div style="font-size: 13px; line-height: 1.6; color: #1d1d1f; margin-top: 12px;">
+                    <p style="margin-bottom: 12px;">
+                        <strong>Mean Reversion Setup Detected:</strong> Price deviated -2.3σ from 20-period moving average, indicating oversold conditions.
+                    </p>
+                    <p style="margin-bottom: 12px;">
+                        <strong>Multi-Horizon Confirmation:</strong> All 3 timeframes (1-bar, 5-bar, 10-bar) aligned bullish with 87% aggregate confidence.
+                    </p>
+                    <p style="margin-bottom: 12px;">
+                        <strong>Technical Indicators:</strong> RSI at 34 (oversold), Bollinger Band lower proximity at 0.95, volume surge 1.8x average.
+                    </p>
+                    <p>
+                        <strong>Risk/Reward:</strong> 3.5:1 ratio. Target +3.96% vs stop -1.12%. Position sized at 30% of capital (max 3 positions).
+                    </p>
+                </div>
+            </div>
+
+            <div class="disclaimer">
+                ⚠️ This is our proprietary AI's trade decision. Not investment advice. Past performance does not guarantee future results. Trading leveraged ETFs involves substantial risk.
+            </div>
+        </div>
+
+        <!-- Positions Screen -->
+        <div class="screen" id="positions">
+            <div class="header">
+                <h1>Our Active Positions</h1>
+                <div class="subtitle">Watch Our AI Manage Risk in Real-Time</div>
+                <div class="education-notice">For Educational Purposes Only</div>
+            </div>
+
+            <div class="portfolio-card">
+                <div class="portfolio-label">Total Positions P&L (Today)</div>
+                <div class="portfolio-value" style="color: #155724;">+$1,248.50</div>
+                <div class="portfolio-change positive">
+                    ↑ +1.25% • 3 Active Positions
+                </div>
+            </div>
+
+            <div class="section-title">Active Trades</div>
+
+            <div class="position-card">
+                <div class="position-header">
+                    <div>
+                        <div class="symbol">TQQQ</div>
+                        <div class="symbol-name">295 shares @ $102.45</div>
+                    </div>
+                    <div class="pnl positive">+$543.20</div>
+                </div>
+                <div style="font-size: 11px; color: #86868b;">
+                    Opened: 9:45 AM • Approaching profit target (+1.8% of +3.96%)
+                </div>
+            </div>
+
+            <div class="position-card">
+                <div class="position-header">
+                    <div>
+                        <div class="symbol">UVXY</div>
+                        <div class="symbol-name">350 shares @ $34.20</div>
+                    </div>
+                    <div class="pnl positive">+$245.00</div>
+                </div>
+                <div style="font-size: 11px; color: #86868b;">
+                    Opened: 9:32 AM • Holding (+2.1% of +3.5% target)
+                </div>
+            </div>
+
+            <div class="position-card">
+                <div class="position-header">
+                    <div>
+                        <div class="symbol">SPXU</div>
+                        <div class="symbol-name">420 shares @ $28.15</div>
+                    </div>
+                    <div class="pnl positive">+$460.30</div>
+                </div>
+                <div style="font-size: 11px; color: #86868b;">
+                    Opened: 9:38 AM • Near exit (+3.2% of +3.8% target)
+                </div>
+            </div>
+
+            <div class="disclaimer">
+                ⚠️ You are viewing our AI's active positions. These are actual trades executed by our system for demonstration purposes only. Not investment advice.
+            </div>
+        </div>
+
+        <!-- History Screen -->
+        <div class="screen" id="history">
+            <div class="header">
+                <h1>Our Performance History</h1>
+                <div class="subtitle">30 Days of Complete Trading Records</div>
+                <div class="education-notice">For Educational Purposes Only</div>
+            </div>
+
+            <div class="date-picker">
+                <label>VIEW PERIOD:</label>
+                <div class="date-nav">
+                    <button onclick="changePeriod(-1)">◀</button>
+                    <input type="date" id="historyDate" value="2025-10-17" onchange="loadHistoryData()">
+                    <button onclick="changePeriod(1)">▶</button>
+                </div>
+            </div>
+
+            <div class="performance-selector">
+                <button class="active" onclick="selectPeriod(this, 'daily')">Daily</button>
+                <button onclick="selectPeriod(this, 'weekly')">Weekly</button>
+                <button onclick="selectPeriod(this, 'monthly')">Monthly</button>
+                <button onclick="selectPeriod(this, '90day')">90-Day</button>
+            </div>
+
+            <div class="portfolio-card">
+                <div class="portfolio-label">Overall Performance (30 Days)</div>
+                <div class="portfolio-value">+26.0%</div>
+                <div style="font-size: 13px; color: #86868b; margin-top: 8px;">
+                    Total Return • Loading trades...
+                </div>
+                <div style="font-size: 12px; color: #1d1d1f; margin-top: 12px; line-height: 1.6;">
+                    <strong>3-Month Summary:</strong><br>
+                    Total Return: +42.3% • Max Drawdown: -2.8%<br>
+                    Profitable Days: 62/90 (68.9%) • Avg Daily P&L: +$470
+                </div>
+            </div>
+
+            <div class="candlestick-chart">
+                <h3 style="margin-bottom: 16px; font-size: 16px;">Portfolio Equity Curve</h3>
+                <svg width="100%" height="200" viewBox="0 0 340 200" style="overflow: visible;">
+                    <!-- Grid -->
+                    <line x1="0" y1="40" x2="340" y2="40" stroke="#e5e5e7" stroke-width="1"/>
+                    <line x1="0" y1="80" x2="340" y2="80" stroke="#e5e5e7" stroke-width="1"/>
+                    <line x1="0" y1="120" x2="340" y2="120" stroke="#e5e5e7" stroke-width="1"/>
+                    <line x1="0" y1="160" x2="340" y2="160" stroke="#e5e5e7" stroke-width="1"/>
+
+                    <!-- Equity curve -->
+                    <path d="M 0,150 L 40,145 L 80,135 L 120,130 L 160,125 L 200,115 L 240,105 L 280,95 L 320,85 L 340,80"
+                          fill="none" stroke="#667eea" stroke-width="3"/>
+
+                    <!-- Current value marker -->
+                    <circle cx="340" cy="80" r="5" fill="#667eea"/>
+                    <text x="290" y="70" font-size="11" fill="#667eea" font-weight="600">$142,300</text>
+
+                    <!-- Labels -->
+                    <text x="5" y="195" font-size="10" fill="#86868b">Jul 20</text>
+                    <text x="150" y="195" font-size="10" fill="#86868b">Sep 1</text>
+                    <text x="300" y="195" font-size="10" fill="#86868b">Oct 17</text>
+                </svg>
+            </div>
+
+            <div class="section-title">Daily Performance (Loading...)</div>
+
+            <!-- Daily performance cards will be populated dynamically by populateHistoryScreen() -->
+
+            <div class="disclaimer">
+                ⚠️ Past performance does not guarantee future results. These are our AI's historical trades for educational purposes. Not investment advice. Actual trading involves substantial risk of loss.
+            </div>
+        </div>
+
+        <!-- Settings Screen -->
+        <div class="screen" id="settings">
+            <div class="header">
+                <h1>About Sentio Lite</h1>
+                <div class="subtitle">Proprietary AI Trading System</div>
+                <div class="education-notice">For Educational Purposes Only</div>
+            </div>
+
+            <div class="detail-section">
+                <h3 style="margin-bottom: 12px;">What You're Watching</h3>
+                <p style="font-size: 13px; line-height: 1.6; color: #1d1d1f;">
+                    Sentio Lite showcases our proprietary AI trading system in action. You're observing real trades executed by our algorithms across 12 leveraged ETFs.
+                </p>
+                <p style="font-size: 13px; line-height: 1.6; color: #1d1d1f; margin-top: 12px;">
+                    Our AI uses advanced machine learning (tested: PPO, XGBoost, ensemble methods, and more) to identify mean reversion opportunities and manage risk.
+                </p>
+            </div>
+
+            <div class="detail-section">
+                <h3 style="margin-bottom: 12px;">Technology</h3>
+                <ul style="font-size: 13px; line-height: 1.8; color: #1d1d1f; margin-left: 20px;">
+                    <li>Proprietary prediction algorithms</li>
+                    <li>Multi-horizon signal confirmation</li>
+                    <li>Adaptive position sizing</li>
+                    <li>Real-time risk management</li>
+                    <li>Continuous learning and optimization</li>
+                </ul>
+            </div>
+
+            <div class="detail-section">
+                <h3 style="margin-bottom: 12px;">App Info</h3>
+                <div style="font-size: 13px; color: #86868b;">
+                    <div style="margin-bottom: 8px;">Version: 1.0.0</div>
+                    <div style="margin-bottom: 8px;">© 2025 Sentio Lite</div>
+                    <div style="margin-bottom: 8px;">support@sentiolite.com</div>
+                </div>
+            </div>
+
+            <div class="detail-section" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+                <h3 style="margin-bottom: 12px; color: #856404;">⚠️ Legal Disclaimer</h3>
+                <div style="font-size: 12px; line-height: 1.6; color: #856404;">
+                    <p style="margin-bottom: 12px;">
+                        <strong>EDUCATIONAL & INFORMATIONAL PURPOSES ONLY</strong>
+                    </p>
+                    <p style="margin-bottom: 12px;">
+                        This app displays our proprietary AI trading system for educational purposes. The signals, trades, and recommendations shown are NOT financial advice or investment recommendations.
+                    </p>
+                    <p style="margin-bottom: 12px;">
+                        Trading leveraged ETFs involves substantial risk of loss, including possible loss of principal. Past performance does not guarantee future results.
+                    </p>
+                    <p>
+                        <strong>YOU ARE SOLELY RESPONSIBLE FOR YOUR TRADING DECISIONS.</strong> We are not liable for any losses, damages, or claims arising from use of this application.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trade Detail Modal -->
+        <div class="modal" id="tradeModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modalTradeTitle">TNA Trade Details</h2>
+                    <button class="modal-close" onclick="closeTradeModal()">✕</button>
+                </div>
+
+                <div style="padding: 16px;">
+                    <div class="detail-section">
+                        <div class="info-badge">📊 TRADE SUMMARY</div>
+                        <h3 style="margin-bottom: 12px;">Oct 17, 2025 • 9:15 AM - 9:52 AM</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">Symbol</div>
+                                <div class="detail-value">TNA</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Duration</div>
+                                <div class="detail-value">37 min</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Entry Price</div>
+                                <div class="detail-value">$31.20</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Exit Price</div>
+                                <div class="detail-value">$32.45</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Shares</div>
+                                <div class="detail-value">380</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Position Size</div>
+                                <div class="detail-value">$11,856</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">P&L</div>
+                                <div class="detail-value" style="color: #155724;">+$475.00</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Return</div>
+                                <div class="detail-value" style="color: #155724;">+4.0%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="info-badge">🎯 ENTRY DECISION</div>
+                        <h3 style="margin-bottom: 12px;">Why AI Entered at 9:15 AM</h3>
+                        <div class="tech-grid">
+                            <div class="tech-item">
+                                <div class="tech-label">AI Confidence</div>
+                                <div class="tech-value bullish">82%</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">Entry Signal</div>
+                                <div class="tech-value bullish">+2.18</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">RSI</div>
+                                <div class="tech-value bullish">31.5</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">σ from MA</div>
+                                <div class="tech-value bullish">-2.1σ</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 13px; margin-top: 12px; line-height: 1.6; color: #1d1d1f;">
+                            <strong>Entry Rationale:</strong> Russell 2000 3x Bull showed strong mean reversion setup. Price deviated -2.1 standard deviations from 20-period MA with RSI at 31.5 (oversold). All three multi-horizon signals (1-bar, 5-bar, 10-bar) aligned bullish. Volume surge 1.6x average confirmed institutional interest. Confidence weighted at 82% based on historical pattern matching.
+                        </p>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="info-badge">🚪 EXIT DECISION</div>
+                        <h3 style="margin-bottom: 12px;">Why AI Exited at 9:52 AM</h3>
+                        <div class="tech-grid">
+                            <div class="tech-item">
+                                <div class="tech-label">Exit Type</div>
+                                <div class="detail-value" style="color: #155724;">Profit Target</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">Target</div>
+                                <div class="detail-value">+3.96%</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">Achieved</div>
+                                <div class="detail-value" style="color: #155724;">+4.0%</div>
+                            </div>
+                            <div class="tech-item">
+                                <div class="tech-label">Beat Target By</div>
+                                <div class="detail-value" style="color: #155724;">+37 bps</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 13px; margin-top: 12px; line-height: 1.6; color: #1d1d1f;">
+                            <strong>Exit Rationale:</strong> Predetermined profit target of +3.96% reached at $32.43 (9:51 AM). AI monitoring detected continued momentum, allowing position to run an additional minute before mean reversion signal weakened. Exited at $32.45 for +4.0% return. Multi-horizon signals remained bullish but risk management protocol prioritizes locking in gains. This disciplined approach is key to our +0.47% MRD performance.
+                        </p>
+                    </div>
+
+                    <div class="candlestick-chart">
+                        <h3 style="margin-bottom: 16px; font-size: 16px;">TNA 1-Minute Chart • Oct 17, 2025</h3>
+                        <svg width="100%" height="180" viewBox="0 0 300 180" style="overflow: visible;">
+                            <!-- Grid -->
+                            <line x1="0" y1="40" x2="300" y2="40" stroke="#e5e5e7" stroke-width="1"/>
+                            <line x1="0" y1="90" x2="300" y2="90" stroke="#e5e5e7" stroke-width="1" stroke-dasharray="2,2"/>
+                            <line x1="0" y1="140" x2="300" y2="140" stroke="#e5e5e7" stroke-width="1"/>
+
+                            <!-- Candlesticks (simplified) -->
+                            <!-- Green candles showing upward move -->
+                            <line x1="30" y1="130" x2="30" y2="110" stroke="#34c759" stroke-width="2"/>
+                            <rect x="27" y="125" width="6" height="10" fill="#34c759"/>
+
+                            <line x1="60" y1="115" x2="60" y2="95" stroke="#34c759" stroke-width="2"/>
+                            <rect x="57" y="110" width="6" height="12" fill="#34c759"/>
+
+                            <line x1="90" y1="100" x2="90" y2="75" stroke="#34c759" stroke-width="2"/>
+                            <rect x="87" y="95" width="6" height="15" fill="#34c759"/>
+
+                            <line x1="120" y1="80" x2="120" y2="60" stroke="#34c759" stroke-width="2"/>
+                            <rect x="117" y="75" width="6" height="12" fill="#34c759"/>
+
+                            <!-- Entry marker -->
+                            <circle cx="30" cy="130" r="6" fill="none" stroke="#667eea" stroke-width="2"/>
+                            <text x="10" y="155" font-size="9" fill="#667eea" font-weight="600">ENTRY</text>
+                            <text x="5" y="165" font-size="8" fill="#667eea">$31.20</text>
+
+                            <!-- Exit marker -->
+                            <circle cx="270" cy="55" r="6" fill="none" stroke="#ffc107" stroke-width="2"/>
+                            <text x="252" y="45" font-size="9" fill="#ffc107" font-weight="600">EXIT</text>
+                            <text x="247" y="35" font-size="8" fill="#ffc107">$32.45</text>
+
+                            <!-- Price line -->
+                            <polyline points="30,130 60,115 90,100 120,80 150,70 180,65 210,60 240,57 270,55"
+                                      fill="none" stroke="#667eea" stroke-width="2" opacity="0.6"/>
+
+                            <!-- Time labels -->
+                            <text x="20" y="175" font-size="9" fill="#86868b">9:15</text>
+                            <text x="130" y="175" font-size="9" fill="#86868b">9:33</text>
+                            <text x="260" y="175" font-size="9" fill="#86868b">9:52</text>
+                        </svg>
+                    </div>
+
+                    <div class="detail-section" style="background: #d4edda; border-left: 4px solid #34c759;">
+                        <h3 style="margin-bottom: 12px; color: #155724;">💡 Key Takeaways</h3>
+                        <ul style="font-size: 12px; line-height: 1.8; color: #155724; margin-left: 20px;">
+                            <li><strong>Disciplined Entry:</strong> Waited for -2.1σ deviation with RSI confirmation</li>
+                            <li><strong>Multi-Horizon Alignment:</strong> All 3 timeframes showed bullish signals</li>
+                            <li><strong>Risk Management:</strong> Predefined +3.96% target set before entry</li>
+                            <li><strong>Execution:</strong> Captured +4.0%, beating target by 37 bps</li>
+                            <li><strong>Win Rate Context:</strong> This trade represents our 67.8% win rate strategy</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="showScreen('dashboard')">
+                <div class="nav-icon">📊</div>
+                <div class="nav-label">Signals</div>
+            </div>
+            <div class="nav-item" onclick="showScreen('positions')">
+                <div class="nav-icon">💼</div>
+                <div class="nav-label">Our Positions</div>
+            </div>
+            <div class="nav-item" onclick="showScreen('history')">
+                <div class="nav-icon">📚</div>
+                <div class="nav-label">Our History</div>
+            </div>
+            <div class="nav-item" onclick="showScreen('settings')">
+                <div class="nav-icon">⚙️</div>
+                <div class="nav-label">About</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include 90-day trading data -->
+    <script src="trading_data_90days.js"></script>
+
+    <script>
+        // Build historical data lookup from tradingData
+        let historicalData = {};
+        let currentSelectedTrade = null;
+
+        // Wait for tradingData to be loaded
+        window.addEventListener('load', function() {
+            if (typeof tradingData !== 'undefined') {
+                // Convert trading data to lookup format
+                tradingData.days.forEach(day => {
+                    const dateObj = new Date(day.date);
+                    const dateLabel = dateObj.toLocaleDateString('en-US', {
+                        year: 'numeric', month: 'short', day: 'numeric'
+                    });
+
+                    historicalData[day.date] = {
+                        portfolioValue: `$${day.portfolioValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`,
+                        change: `${day.summary.totalPnl >= 0 ? '+' : ''}$${day.summary.totalPnl.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${day.summary.totalPnlPercent >= 0 ? '+' : ''}${day.summary.totalPnlPercent}%)`,
+                        positive: day.summary.totalPnl >= 0,
+                        dateLabel: dateLabel,
+                        updateTime: 'Market close: 4:00 PM',
+                        trades: day.trades,
+                        summary: day.summary,
+                        totalReturn: day.totalReturn
+                    };
+                });
+
+                console.log(`Loaded ${Object.keys(historicalData).length} days of trading data`);
+
+                // Initialize with default date
+                loadDateData();
+                populateHistoryScreen();
+            } else {
+                console.error('Trading data not loaded!');
+            }
+        });
+
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+
+            // Show selected screen
+            document.getElementById(screenId).classList.add('active');
+
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+        }
+
+        function showDetail(symbol) {
+            document.getElementById('detail-symbol').textContent = symbol;
+            showScreen('detail');
+        }
+
+        function showDashboard() {
+            document.getElementById('dashboard').classList.add('active');
+            document.getElementById('detail').classList.remove('active');
+        }
+
+        // Date navigation
+        function changeDate(direction) {
+            const dateInput = document.getElementById('viewDate');
+            const currentDate = new Date(dateInput.value);
+            currentDate.setDate(currentDate.getDate() + direction);
+            dateInput.value = currentDate.toISOString().split('T')[0];
+            loadDateData();
+        }
+
+        function loadDateData() {
+            const dateInput = document.getElementById('viewDate');
+            if (!dateInput) return;
+
+            const selectedDate = dateInput.value;
+            const data = historicalData[selectedDate];
+
+            if (!data) {
+                console.log('No data for date:', selectedDate);
+                // Find the closest date
+                const dates = Object.keys(historicalData).sort();
+                const closestDate = dates.reduce((prev, curr) => {
+                    return Math.abs(new Date(curr) - new Date(selectedDate)) < Math.abs(new Date(prev) - new Date(selectedDate)) ? curr : prev;
+                });
+                dateInput.value = closestDate;
+                return loadDateData();
+            }
+
+            // Update portfolio card on dashboard
+            const portfolioValue = document.getElementById('portfolioValue');
+            const dateLabel = document.getElementById('dateLabel');
+            const updateTime = document.getElementById('updateTime');
+            const changeEl = document.getElementById('portfolioChange');
+
+            if (portfolioValue) portfolioValue.textContent = data.portfolioValue;
+            if (dateLabel) dateLabel.textContent = data.dateLabel;
+            if (updateTime) updateTime.textContent = data.updateTime;
+
+            if (changeEl) {
+                changeEl.textContent = (data.positive ? '↑ ' : '↓ ') + data.change;
+                changeEl.className = 'portfolio-change ' + (data.positive ? 'positive' : 'negative');
+            }
+
+            console.log('Loaded data for ' + data.dateLabel + ': ' + data.change);
+        }
+
+        function changePeriod(direction) {
+            const dateInput = document.getElementById('historyDate');
+            if (!dateInput) return;
+
+            const dates = Object.keys(historicalData).sort();
+            const currentIndex = dates.indexOf(dateInput.value);
+
+            console.log('changePeriod:', direction, 'current:', dateInput.value, 'index:', currentIndex);
+
+            if (currentIndex === -1) {
+                // Current date not in our data, find closest
+                dateInput.value = dates[dates.length - 1];
+                loadHistoryData();
+                return;
+            }
+
+            // Move to next/previous trading day
+            const newIndex = currentIndex + direction;
+
+            if (newIndex >= 0 && newIndex < dates.length) {
+                dateInput.value = dates[newIndex];
+                console.log('New date:', dateInput.value);
+                loadHistoryData();
+            } else {
+                console.log('Reached end of data range');
+            }
+        }
+
+        function loadHistoryData() {
+            const dateInput = document.getElementById('historyDate');
+            if (!dateInput) return;
+
+            const selectedDate = dateInput.value;
+            console.log('=== loadHistoryData for specific date ===');
+            console.log('Selected date:', selectedDate);
+
+            // Find the day's data
+            const dayData = historicalData[selectedDate];
+            if (!dayData || !dayData.trades) {
+                console.error('No data found for date:', selectedDate);
+                alert(`No trading data for ${selectedDate}. This might be a weekend or the date is outside our data range.`);
+                return;
+            }
+
+            console.log(`Found data for ${selectedDate}:`, dayData.summary);
+
+            const historyScreen = document.getElementById('history');
+            const statsCard = historyScreen.querySelector('.portfolio-card');
+            const sectionTitle = historyScreen.querySelector('.section-title');
+
+            // Remove all period selector active states
+            const periodButtons = historyScreen.querySelectorAll('.performance-selector button');
+            periodButtons.forEach(btn => btn.classList.remove('active'));
+
+            // Update stats card to show this specific day
+            const dateObj = new Date(selectedDate);
+            const dateLabel = dateObj.toLocaleDateString('en-US', {
+                weekday: 'long', year: 'numeric', month: 'short', day: 'numeric'
+            });
+
+            statsCard.innerHTML = `
+                <div class="portfolio-label">Specific Day View - ${dateLabel}</div>
+                <div class="portfolio-value">${dayData.summary.totalPnlPercent >= 0 ? '+' : ''}${dayData.summary.totalPnlPercent}%</div>
+                <div style="font-size: 13px; color: #86868b; margin-top: 8px;">
+                    Daily Return • ${dayData.summary.numTrades} trades • ${dayData.summary.winRate}% win rate
+                </div>
+                <div style="font-size: 12px; color: #1d1d1f; margin-top: 12px; line-height: 1.6;">
+                    <strong>Day Summary:</strong><br>
+                    P&L: ${dayData.summary.totalPnl >= 0 ? '+' : ''}$${dayData.summary.totalPnl.toLocaleString()} • Portfolio Value: ${dayData.portfolioValue}<br>
+                    Winners: ${dayData.summary.winners} • Losers: ${dayData.summary.losers} • Win Rate: ${dayData.summary.winRate}%
+                </div>
+            `;
+
+            // Update title
+            sectionTitle.textContent = `All ${dayData.summary.numTrades} Trades for ${dateLabel} (Click for details)`;
+
+            // Remove old trade cards
+            const oldCards = historyScreen.querySelectorAll('.trade-card');
+            oldCards.forEach(card => card.remove());
+
+            // Show this day's trades
+            let insertAfter = sectionTitle;
+
+            dayData.trades.forEach((trade, index) => {
+                const tradeCard = document.createElement('div');
+                tradeCard.className = 'trade-card';
+                tradeCard.style.cursor = 'pointer';
+                tradeCard.addEventListener('click', function() {
+                    showTradeDetail(trade.id);
+                });
+
+                const isWinner = trade.pnl > 0;
+
+                tradeCard.innerHTML = `
+                    <div class="trade-time">${trade.entryTime} - ${trade.exitTime} (${trade.duration} min)</div>
+                    <div class="position-header">
+                        <div>
+                            <div class="symbol">${trade.symbol} <span class="exit-badge" style="background: ${isWinner ? '#d4edda' : '#f8d7da'}; color: ${isWinner ? '#155724' : '#721c24'};">
+                                ${trade.exitReason === 'PROFIT_TARGET' ? 'TARGET' : 'STOP LOSS'}
+                            </span></div>
+                            <div class="symbol-name">${trade.shares} shares • $${trade.entryPrice} → $${trade.exitPrice}</div>
+                        </div>
+                        <div class="pnl ${isWinner ? 'positive' : 'negative'}">
+                            ${trade.pnl >= 0 ? '+' : ''}$${trade.pnl.toFixed(2)} (${trade.pnlPercent >= 0 ? '+' : ''}${trade.pnlPercent}%)
+                        </div>
+                    </div>
+                    <div style="font-size: 11px; color: #86868b; margin-top: 8px;">
+                        Confidence: ${trade.technical.confidence}% • RSI: ${trade.technical.rsi} • Signal: +${trade.technical.signal1bar}
+                    </div>
+                `;
+
+                insertAfter.parentNode.insertBefore(tradeCard, insertAfter.nextSibling);
+                insertAfter = tradeCard;
+            });
+
+            console.log(`✓ Loaded ${dayData.trades.length} trades for ${dateLabel}`);
+        }
+
+        // Toggle technical details
+        function toggleTechDetails(element) {
+            const content = element.nextElementSibling;
+            const arrow = element.querySelector('span');
+
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                arrow.textContent = '▼';
+            } else {
+                content.classList.add('expanded');
+                arrow.textContent = '▲';
+            }
+        }
+
+        // Trade detail modal
+        function showTradeDetail(tradeId) {
+            if (!tradingData) {
+                console.error('Trading data not loaded');
+                return;
+            }
+
+            // Find the trade
+            let trade = null;
+            for (const day of tradingData.days) {
+                trade = day.trades.find(t => t.id === tradeId);
+                if (trade) break;
+            }
+
+            if (!trade) {
+                console.error('Trade not found:', tradeId);
+                return;
+            }
+
+            currentSelectedTrade = trade;
+
+            // Update modal with trade data
+            const modal = document.getElementById('tradeModal');
+            const isWinner = trade.pnl > 0;
+
+            // Update modal content
+            modal.querySelector('.modal-title').textContent = `${trade.symbol} Trade Details`;
+
+            // Find all sections and update them
+            const modalContent = modal.querySelector('.modal-content');
+
+            // Update summary section
+            modalContent.querySelector('.detail-section:nth-of-type(1) h3').textContent =
+                `${new Date(trade.date).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})} • ${trade.entryTime} - ${trade.exitTime}`;
+
+            const detailGrid = modalContent.querySelector('.detail-grid');
+            detailGrid.innerHTML = `
+                <div class="detail-item">
+                    <div class="detail-label">Symbol</div>
+                    <div class="detail-value">${trade.symbol}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Duration</div>
+                    <div class="detail-value">${trade.duration} min</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Entry Price</div>
+                    <div class="detail-value">$${trade.entryPrice}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Exit Price</div>
+                    <div class="detail-value">$${trade.exitPrice}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Shares</div>
+                    <div class="detail-value">${trade.shares}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Position Size</div>
+                    <div class="detail-value">$${trade.positionSize.toLocaleString()}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">P&L</div>
+                    <div class="detail-value" style="color: ${isWinner ? '#155724' : '#721c24'};">
+                        ${trade.pnl >= 0 ? '+' : ''}$${trade.pnl.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Return</div>
+                    <div class="detail-value" style="color: ${isWinner ? '#155724' : '#721c24'};">
+                        ${trade.pnlPercent >= 0 ? '+' : ''}${trade.pnlPercent}%
+                    </div>
+                </div>
+            `;
+
+            // Update entry decision section
+            const entryTechGrid = modalContent.querySelectorAll('.tech-grid')[0];
+            entryTechGrid.innerHTML = `
+                <div class="tech-item">
+                    <div class="tech-label">AI Confidence</div>
+                    <div class="tech-value bullish">${trade.technical.confidence}%</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-label">Entry Signal</div>
+                    <div class="tech-value bullish">+${trade.technical.signal1bar}</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-label">RSI</div>
+                    <div class="tech-value bullish">${trade.technical.rsi}</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-label">σ from MA</div>
+                    <div class="tech-value bullish">${trade.technical.sigma}σ</div>
+                </div>
+            `;
+
+            modalContent.querySelectorAll('.detail-section')[1].querySelector('p').textContent = trade.entryReason;
+
+            // Update exit decision section
+            const exitTechGrid = modalContent.querySelectorAll('.tech-grid')[1];
+            exitTechGrid.innerHTML = `
+                <div class="tech-item">
+                    <div class="tech-label">Exit Type</div>
+                    <div class="detail-value" style="color: ${isWinner ? '#155724' : '#721c24'};">
+                        ${trade.exitReason === 'PROFIT_TARGET' ? 'Profit Target' : 'Stop Loss'}
+                    </div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-label">Target</div>
+                    <div class="detail-value">${trade.exitReason === 'PROFIT_TARGET' ? '+3.96%' : '-1.12%'}</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-label">Achieved</div>
+                    <div class="detail-value" style="color: ${isWinner ? '#155724' : '#721c24'};">
+                        ${trade.pnlPercent >= 0 ? '+' : ''}${trade.pnlPercent}%
+                    </div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-label">${isWinner ? 'Beat Target By' : 'Loss vs Target'}</div>
+                    <div class="detail-value" style="color: ${isWinner ? '#155724' : '#721c24'};">
+                        ${isWinner ? '+' : ''}${(Math.abs(trade.pnlPercent) - 3.96).toFixed(0)} bps
+                    </div>
+                </div>
+            `;
+
+            modalContent.querySelectorAll('.detail-section')[2].querySelector('p').textContent = trade.exitReason;
+
+            // Update chart title
+            modalContent.querySelector('.candlestick-chart h3').textContent =
+                `${trade.symbol} 1-Minute Chart • ${new Date(trade.date).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'})}`;
+
+            // Show modal
+            modal.classList.add('active');
+        }
+
+        function closeTradeModal() {
+            const modal = document.getElementById('tradeModal');
+            modal.classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('tradeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeTradeModal();
+            }
+        });
+
+        // Performance period selector - SIMPLIFIED
+        window.selectPeriod = function(button, period) {
+            console.log('=== selectPeriod START ===');
+            console.log('Period:', period);
+            console.log('Button:', button);
+
+            try {
+                // Remove active from all buttons in this selector
+                const parent = button.parentElement;
+                parent.querySelectorAll('button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                // Add active to clicked button
+                button.classList.add('active');
+                console.log('Button classes updated');
+
+                // Filter and display data based on period
+                if (!tradingData) {
+                    console.error('ERROR: Trading data not loaded!');
+                    alert('Trading data not loaded yet. Please refresh the page.');
+                    return;
+                }
+                console.log('Trading data OK:', tradingData.days.length, 'days');
+
+            const historyScreen = document.getElementById('history');
+            const sectionTitle = historyScreen.querySelector('.section-title');
+            const statsCard = historyScreen.querySelector('.portfolio-card');
+
+            console.log('History screen found:', !!historyScreen);
+            console.log('Section title found:', !!sectionTitle);
+
+            // Remove old cards
+            const oldCards = historyScreen.querySelectorAll('.trade-card');
+            console.log('Removing', oldCards.length, 'old cards');
+            oldCards.forEach(card => card.remove());
+
+            let daysToShow = [];
+            let title = '';
+            let statsHTML = '';
+
+            switch(period) {
+                case 'daily':
+                    // Show all individual days
+                    daysToShow = [...tradingData.days].reverse();
+                    const avgDailyReturn = (tradingData.statistics.totalReturn / tradingData.days.length).toFixed(2);
+                    title = `Daily Performance - All ${tradingData.days.length} Days (Click any day)`;
+                    statsHTML = `
+                        <div class="portfolio-label">Daily View - Avg Per Day</div>
+                        <div class="portfolio-value">+${avgDailyReturn}%</div>
+                        <div style="font-size: 13px; color: #86868b; margin-top: 8px;">
+                            Average Daily Return • ${tradingData.statistics.totalTrades} trades total
+                        </div>
+                        <div style="font-size: 12px; color: #1d1d1f; margin-top: 12px; line-height: 1.6;">
+                            <strong>Period:</strong> ${tradingData.days.length} trading days<br>
+                            Total Return: +${tradingData.statistics.totalReturn}% (${tradingData.days.length} days)<br>
+                            Started: $100,000 → Ended: $${tradingData.statistics.finalValue.toLocaleString()}
+                        </div>
+                    `;
+                    break;
+
+                case 'weekly':
+                    // Group by week
+                    const weeks = {};
+                    tradingData.days.forEach(day => {
+                        const date = new Date(day.date);
+                        const weekStart = new Date(date);
+                        weekStart.setDate(date.getDate() - date.getDay());
+                        const weekKey = weekStart.toISOString().split('T')[0];
+
+                        if (!weeks[weekKey]) {
+                            weeks[weekKey] = {
+                                startDate: weekKey,
+                                days: [],
+                                totalPnl: 0,
+                                trades: 0
+                            };
+                        }
+                        weeks[weekKey].days.push(day);
+                        weeks[weekKey].totalPnl += day.summary.totalPnl;
+                        weeks[weekKey].trades += day.summary.numTrades;
+                    });
+
+                    daysToShow = Object.values(weeks).reverse();
+                    const numWeeks = Object.keys(weeks).length;
+                    const avgWeeklyReturn = (tradingData.statistics.totalReturn / numWeeks).toFixed(2);
+                    title = `Weekly Performance - ${numWeeks} Weeks`;
+                    statsHTML = `
+                        <div class="portfolio-label">Weekly View - Avg Per Week</div>
+                        <div class="portfolio-value">+${avgWeeklyReturn}%</div>
+                        <div style="font-size: 13px; color: #86868b; margin-top: 8px;">
+                            Average Weekly Return • ${tradingData.statistics.totalTrades} trades total
+                        </div>
+                        <div style="font-size: 12px; color: #1d1d1f; margin-top: 12px; line-height: 1.6;">
+                            <strong>Period:</strong> ${numWeeks} weeks (${tradingData.days.length} trading days)<br>
+                            Total Return: +${tradingData.statistics.totalReturn}% (${numWeeks} weeks)<br>
+                            Started: $100,000 → Ended: $${tradingData.statistics.finalValue.toLocaleString()}
+                        </div>
+                    `;
+                    break;
+
+                case 'monthly':
+                    // Group by month
+                    const months = {};
+                    tradingData.days.forEach(day => {
+                        const monthKey = day.date.substring(0, 7); // YYYY-MM
+                        if (!months[monthKey]) {
+                            months[monthKey] = {
+                                month: monthKey,
+                                days: [],
+                                totalPnl: 0,
+                                trades: 0
+                            };
+                        }
+                        months[monthKey].days.push(day);
+                        months[monthKey].totalPnl += day.summary.totalPnl;
+                        months[monthKey].trades += day.summary.numTrades;
+                    });
+
+                    daysToShow = Object.values(months).reverse();
+                    const numMonths = Object.keys(months).length;
+                    const avgMonthlyReturn = (tradingData.statistics.totalReturn / numMonths).toFixed(2);
+                    title = `Monthly Performance - ${numMonths} Months`;
+                    statsHTML = `
+                        <div class="portfolio-label">Monthly View - Avg Per Month</div>
+                        <div class="portfolio-value">+${avgMonthlyReturn}%</div>
+                        <div style="font-size: 13px; color: #86868b; margin-top: 8px;">
+                            Average Monthly Return • ${tradingData.statistics.totalTrades} trades total
+                        </div>
+                        <div style="font-size: 12px; color: #1d1d1f; margin-top: 12px; line-height: 1.6;">
+                            <strong>Period:</strong> ${numMonths} months (${tradingData.days.length} trading days)<br>
+                            Total Return: +${tradingData.statistics.totalReturn}% (${numMonths} months)<br>
+                            Started: $100,000 → Ended: $${tradingData.statistics.finalValue.toLocaleString()}
+                        </div>
+                    `;
+                    break;
+
+                case '90day':
+                    // Show overall summary
+                    daysToShow = [{
+                        summary: {
+                            totalPnl: tradingData.statistics.totalPnl,
+                            numTrades: tradingData.statistics.totalTrades,
+                            winRate: tradingData.statistics.winRate
+                        },
+                        portfolioValue: tradingData.statistics.finalValue,
+                        totalReturn: tradingData.statistics.totalReturn,
+                        date: '30-Day Period'
+                    }];
+                    title = `30-Day Overall Performance`;
+                    statsHTML = `
+                        <div class="portfolio-label">Overall Performance (${tradingData.days.length} Days)</div>
+                        <div class="portfolio-value">+${tradingData.statistics.totalReturn}%</div>
+                        <div style="font-size: 13px; color: #86868b; margin-top: 8px;">
+                            Total Return • ${tradingData.statistics.totalTrades} trades • ${tradingData.statistics.winRate}% win rate
+                        </div>
+                        <div style="font-size: 12px; color: #1d1d1f; margin-top: 12px; line-height: 1.6;">
+                            <strong>${tradingData.days.length}-Day Summary:</strong><br>
+                            Started: $100,000 → Ended: $${tradingData.statistics.finalValue.toLocaleString()}<br>
+                            Profitable Days: ${tradingData.statistics.profitableDays}/${tradingData.days.length} (${tradingData.statistics.profitableDaysPercent}%) • Avg Daily P&L: $${(tradingData.statistics.totalPnl / tradingData.days.length).toFixed(0)}
+                        </div>
+                    `;
+                    break;
+            }
+
+            sectionTitle.textContent = title;
+
+            // Update the statistics card
+            if (statsHTML) {
+                statsCard.innerHTML = statsHTML;
+                console.log('Updated statistics card for period:', period);
+            }
+
+            // Render cards based on period
+            let insertAfter = sectionTitle;
+
+            daysToShow.forEach((item) => {
+                const dayCard = document.createElement('div');
+                dayCard.className = 'trade-card';
+                dayCard.style.cursor = period === 'daily' ? 'pointer' : 'default';
+
+                if (period === 'daily') {
+                    dayCard.addEventListener('click', function() {
+                        showDayDetail(item.date);
+                    });
+
+                    const dateObj = new Date(item.date);
+                    const dateLabel = dateObj.toLocaleDateString('en-US', {
+                        weekday: 'long', year: 'numeric', month: 'short', day: 'numeric'
+                    });
+
+                    dayCard.innerHTML = `
+                        <div class="trade-time">${dateLabel}</div>
+                        <div class="position-header">
+                            <div>
+                                <div class="symbol">Day's Performance</div>
+                                <div class="symbol-name">${item.summary.numTrades} trades • ${item.summary.winRate}% win rate</div>
+                            </div>
+                            <div class="pnl ${item.summary.totalPnl >= 0 ? 'positive' : 'negative'}">
+                                ${item.summary.totalPnl >= 0 ? '+' : ''}$${item.summary.totalPnl.toFixed(2)}
+                            </div>
+                        </div>
+                        <div style="font-size: 11px; color: #86868b; margin-top: 8px;">
+                            ${item.summary.winners} wins, ${item.summary.losers} losses • Portfolio: $${item.portfolioValue.toLocaleString()} (${item.totalReturn >= 0 ? '+' : ''}${item.totalReturn}%)
+                        </div>
+                    `;
+                } else if (period === 'weekly') {
+                    const weekStart = new Date(item.startDate);
+                    const weekEnd = new Date(item.days[item.days.length - 1].date);
+
+                    dayCard.innerHTML = `
+                        <div class="trade-time">Week of ${weekStart.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} - ${weekEnd.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}</div>
+                        <div class="position-header">
+                            <div>
+                                <div class="symbol">Weekly Performance</div>
+                                <div class="symbol-name">${item.days.length} days • ${item.trades} trades</div>
+                            </div>
+                            <div class="pnl ${item.totalPnl >= 0 ? 'positive' : 'negative'}">
+                                ${item.totalPnl >= 0 ? '+' : ''}$${item.totalPnl.toFixed(2)}
+                            </div>
+                        </div>
+                    `;
+                } else if (period === 'monthly') {
+                    const monthDate = new Date(item.month + '-01');
+
+                    dayCard.innerHTML = `
+                        <div class="trade-time">${monthDate.toLocaleDateString('en-US', {month: 'long', year: 'numeric'})}</div>
+                        <div class="position-header">
+                            <div>
+                                <div class="symbol">Monthly Performance</div>
+                                <div class="symbol-name">${item.days.length} days • ${item.trades} trades</div>
+                            </div>
+                            <div class="pnl ${item.totalPnl >= 0 ? 'positive' : 'negative'}">
+                                ${item.totalPnl >= 0 ? '+' : ''}$${item.totalPnl.toFixed(2)}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    dayCard.innerHTML = `
+                        <div class="trade-time">${item.date}</div>
+                        <div class="position-header">
+                            <div>
+                                <div class="symbol">Total Performance</div>
+                                <div class="symbol-name">${item.summary.numTrades} trades • ${item.summary.winRate}% win rate</div>
+                            </div>
+                            <div class="pnl ${item.summary.totalPnl >= 0 ? 'positive' : 'negative'}">
+                                ${item.summary.totalPnl >= 0 ? '+' : ''}$${item.summary.totalPnl.toFixed(2)}
+                            </div>
+                        </div>
+                        <div style="font-size: 11px; color: #86868b; margin-top: 8px;">
+                            Final Portfolio: $${item.portfolioValue.toLocaleString()} (${item.totalReturn >= 0 ? '+' : ''}${item.totalReturn}%)
+                        </div>
+                    `;
+                }
+
+                insertAfter.parentNode.insertBefore(dayCard, insertAfter.nextSibling);
+                insertAfter = dayCard;
+            });
+
+            // Verify cards were added
+            const newCards = historyScreen.querySelectorAll('.trade-card');
+            console.log(`✓ Updated to ${period} view - Created ${daysToShow.length} items, found ${newCards.length} cards in DOM`);
+
+            } catch (error) {
+                console.error('ERROR in selectPeriod:', error);
+                alert('Error: ' + error.message);
+            }
+        };
+
+        // Populate history screen with all days
+        function populateHistoryScreen() {
+            if (!tradingData) return;
+
+            console.log('Populating history screen...');
+
+            const historyScreen = document.getElementById('history');
+
+            // Update overall statistics
+            const statsCard = historyScreen.querySelector('.portfolio-card');
+            statsCard.innerHTML = `
+                <div class="portfolio-label">Overall Performance (${tradingData.days.length} Days)</div>
+                <div class="portfolio-value">+${tradingData.statistics.totalReturn}%</div>
+                <div style="font-size: 13px; color: #86868b; margin-top: 8px;">
+                    Total Return • ${tradingData.statistics.totalTrades} trades • ${tradingData.statistics.winRate}% win rate
+                </div>
+                <div style="font-size: 12px; color: #1d1d1f; margin-top: 12px; line-height: 1.6;">
+                    <strong>${tradingData.days.length}-Day Summary:</strong><br>
+                    Started: $100,000 → Ended: $${tradingData.statistics.finalValue.toLocaleString()}<br>
+                    Profitable Days: ${tradingData.statistics.profitableDays}/${tradingData.days.length} (${tradingData.statistics.profitableDaysPercent}%) • Avg Daily P&L: $${(tradingData.statistics.totalPnl / tradingData.days.length).toFixed(0)}
+                </div>
+            `;
+
+            // Find the Daily button and trigger it to populate the data
+            const dailyButton = historyScreen.querySelector('.performance-selector button:first-child');
+            if (dailyButton) {
+                // Directly call selectPeriod to populate with daily data
+                selectPeriod(dailyButton, 'daily');
+            }
+        }
+
+        // Show trades for a specific day
+        function showDayDetail(date) {
+            console.log('showDayDetail called with date:', date);
+            console.log('Available dates:', Object.keys(historicalData).length);
+
+            const dayData = historicalData[date];
+            if (!dayData || !dayData.trades) {
+                console.error('No trades found for', date);
+                console.log('Available dates:', Object.keys(historicalData).slice(0, 5));
+                return;
+            }
+
+            console.log(`Loading ${dayData.trades.length} trades for ${date}`);
+
+            // Create a modal showing all trades for this day
+            const modal = document.getElementById('tradeModal');
+            const modalContent = modal.querySelector('.modal-content');
+
+            const dateObj = new Date(date);
+            const dateLabel = dateObj.toLocaleDateString('en-US', {
+                weekday: 'long', year: 'numeric', month: 'short', day: 'numeric'
+            });
+
+            // Replace modal content with day's trades
+            modalContent.innerHTML = `
+                <div class="modal-header">
+                    <h2 class="modal-title">${dateLabel} - All Trades</h2>
+                    <button class="modal-close" onclick="closeTradeModal()">✕</button>
+                </div>
+                <div style="padding: 16px;">
+                    <div class="detail-section">
+                        <div class="info-badge">📊 DAILY SUMMARY</div>
+                        <h3 style="margin-bottom: 12px;">${dayData.summary.numTrades} Trades Executed</h3>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">Total P&L</div>
+                                <div class="detail-value" style="color: ${dayData.positive ? '#155724' : '#721c24'};">
+                                    ${dayData.positive ? '+' : ''}$${dayData.summary.totalPnl.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Return</div>
+                                <div class="detail-value" style="color: ${dayData.positive ? '#155724' : '#721c24'};">
+                                    ${dayData.summary.totalPnlPercent >= 0 ? '+' : ''}${dayData.summary.totalPnlPercent}%
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Win Rate</div>
+                                <div class="detail-value">${dayData.summary.winRate}%</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Wins / Losses</div>
+                                <div class="detail-value">${dayData.summary.winners} / ${dayData.summary.losers}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Portfolio Value</div>
+                                <div class="detail-value">${dayData.portfolioValue}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Total Return</div>
+                                <div class="detail-value" style="color: ${dayData.totalReturn >= 0 ? '#155724' : '#721c24'};">
+                                    ${dayData.totalReturn >= 0 ? '+' : ''}${dayData.totalReturn}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-title" style="margin-top: 16px;">All Trades (Click for details)</div>
+                    ${dayData.trades.map(trade => {
+                        const isWinner = trade.pnl > 0;
+                        return `
+                            <div class="trade-card" onclick="event.stopPropagation(); closeTradeModal(); setTimeout(() => showTradeDetail('${trade.id}'), 300);" style="cursor: pointer;">
+                                <div class="trade-time">${trade.entryTime} - ${trade.exitTime} (${trade.duration} min)</div>
+                                <div class="position-header">
+                                    <div>
+                                        <div class="symbol">${trade.symbol} <span class="exit-badge" style="background: ${isWinner ? '#d4edda' : '#f8d7da'}; color: ${isWinner ? '#155724' : '#721c24'};">
+                                            ${trade.exitReason === 'PROFIT_TARGET' ? 'TARGET' : 'STOP LOSS'}
+                                        </span></div>
+                                        <div class="symbol-name">${trade.shares} shares • $${trade.entryPrice} → $${trade.exitPrice}</div>
+                                    </div>
+                                    <div class="pnl ${isWinner ? 'positive' : 'negative'}">
+                                        ${trade.pnl >= 0 ? '+' : ''}$${trade.pnl.toFixed(2)} (${trade.pnlPercent >= 0 ? '+' : ''}${trade.pnlPercent}%)
+                                    </div>
+                                </div>
+                                <div style="font-size: 11px; color: #86868b; margin-top: 8px;">
+                                    Confidence: ${trade.technical.confidence}% • RSI: ${trade.technical.rsi} • Signal: +${trade.technical.signal1bar}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+    </script>
+</body>
+</html>
