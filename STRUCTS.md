@@ -4,6 +4,7 @@
 {
     "id": "e5745507-514c-420c-8094-7b231d7bc312",
     "symbol": "QQQ",
+    "price": 591.06,
     "confidence": 0.71,
     "type": "strong_buy", // enum("strong_sell", "sell", "hold", "buy", "strong_buy")
     "metrics": [
@@ -29,6 +30,7 @@
     "price": 591.95,
     "side": "buy", // enum("buy", "sell")
     "position_intent": "buy_to_open", // enum("buy_to_open", "buy_to_close", "sell_to_open", "sell_to_close")
+    "annotation": "order reasoning",
     "target": 596.01,
     "created_at": 1761185765,
     "updated_at": 1761185765
