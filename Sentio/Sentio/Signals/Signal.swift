@@ -13,7 +13,41 @@ enum SignalType: String, Codable, CaseIterable, Hashable {
 
 struct Metric: Codable, Hashable {
     let key: String
-    let value: String
+    let value: Double
+
+    // Provide resilient decoding for `value` which may have been stored as
+    // Double, Int, or String in older payloads. Encode always as Double.
+    private enum CodingKeys: String, CodingKey {
+        case key
+        case value
+    }
+
+    init(key: String, value: Double) {
+        self.key = key
+        self.value = value
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        key = try container.decode(String.self, forKey: .key)
+
+        // Try decoding as Double, then Int, then String -> Double. Fall back to 0.0 if all fail.
+        if let doubleValue = try? container.decode(Double.self, forKey: .value) {
+            value = doubleValue
+        } else if let intValue = try? container.decode(Int.self, forKey: .value) {
+            value = Double(intValue)
+        } else if let strValue = try? container.decode(String.self, forKey: .value), let parsed = Double(strValue) {
+            value = parsed
+        } else {
+            value = 0.0
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(key, forKey: .key)
+        try container.encode(value, forKey: .value)
+    }
 }
 
 struct Signal: Identifiable, Codable, Hashable {
