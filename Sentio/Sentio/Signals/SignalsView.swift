@@ -100,6 +100,8 @@ struct SignalsView: View {
                                 }
                                 .padding(.vertical, 6)
                                 .shimmer(true)
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Color.clear)
                             }
                             .listStyle(.insetGrouped)
                             .refreshable {
@@ -120,15 +122,33 @@ struct SignalsView: View {
                             .padding()
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                         } else {
-                            List(vm.signals) { signal in
-                                SignalWidget(signal: signal)
-                                    .padding(.vertical, 4)
+                            // Use availability checks so we can call .scrollContentBackground on iOS 16+
+                            if #available(iOS 16.0, *) {
+                                List(vm.signals) { signal in
+                                    SignalWidget(signal: signal)
+                                        .padding(.vertical, 4)
+                                        .listRowSeparator(.hidden)
+                                        .listRowBackground(Color.clear)
+                                }
+                                .listStyle(.plain)
+                                .scrollContentBackground(.hidden)
+                                .refreshable {
+                                    await vm.fetchOnce()
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            } else {
+                                List(vm.signals) { signal in
+                                    SignalWidget(signal: signal)
+                                        .padding(.vertical, 4)
+                                        .listRowSeparator(.hidden)
+                                        .listRowBackground(Color.clear)
+                                }
+                                .listStyle(.plain)
+                                .refreshable {
+                                    await vm.fetchOnce()
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
                             }
-                            .listStyle(.plain)
-                            .refreshable {
-                                await vm.fetchOnce()
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                         }
                     }
 
