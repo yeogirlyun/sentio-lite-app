@@ -6,6 +6,9 @@ import SwiftUI
 struct SignalWidget: View {
     let signal: Signal
 
+    // Track whether the metrics grid is expanded
+    @State private var isExpanded: Bool = false
+
     private var typeLabel: String {
         // Convert raw value like "strong_buy" to an uppercase label (e.g. "STRONG BUY")
         signal.type.rawValue.replacingOccurrences(of: "_", with: " ").localizedUppercase
@@ -76,9 +79,60 @@ struct SignalWidget: View {
                 }
             }
             .frame(maxWidth: .infinity)
+
+            // Expandable Technical Analysis section when metrics are available
+            if !signal.metrics.isEmpty {
+                Spacer().frame(height: 4)
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Button(action: {
+//                        withAnimation(.easeInOut) {
+//                            isExpanded.toggle()
+//                        }
+                        isExpanded.toggle()
+                    }) {
+                        HStack(spacing: 8) {
+                            Text("📈 Technical Analysis")
+                                .font(.subheadline).bold()
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        .contentShape(Rectangle())
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 8)
+                    }
+                    .background(Color(.secondarySystemBackground))
+                    .buttonStyle(PlainButtonStyle())
+                    .cornerRadius(4)
+
+                    if isExpanded {
+                        // Two-column responsive grid for metrics
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                            ForEach(signal.metrics, id: \.key) { metric in
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(metric.key.localizedUppercase)
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                    Text(String(format: "%.2f", metric.value))
+                                        .font(.subheadline).bold()
+                                        .foregroundColor(typeColors.fg)
+                                }
+                                .padding(8)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color(.secondarySystemBackground))
+                                .cornerRadius(8)
+                            }
+                        }
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+                }
+            }
         }
         // Ensure the card has room to display the symbol and capsule; prevents collapse in lists
-        .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
