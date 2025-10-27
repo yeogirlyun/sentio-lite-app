@@ -126,9 +126,9 @@ struct SignalsView: View {
                             if #available(iOS 16.0, *) {
                                 List(vm.signals) { signal in
                                     SignalWidget(signal: signal)
-                                        .padding(.vertical, 4)
                                         .listRowSeparator(.hidden)
                                         .listRowBackground(Color.clear)
+                                        .listRowInsets(.init(top: 4, leading: 16, bottom: 8, trailing: 16))
                                 }
                                 .listStyle(.plain)
                                 .scrollContentBackground(.hidden)
@@ -139,9 +139,9 @@ struct SignalsView: View {
                             } else {
                                 List(vm.signals) { signal in
                                     SignalWidget(signal: signal)
-                                        .padding(.vertical, 4)
                                         .listRowSeparator(.hidden)
                                         .listRowBackground(Color.clear)
+                                        .listRowInsets(.init(top: 4, leading: 16, bottom: 8, trailing: 16))
                                 }
                                 .listStyle(.plain)
                                 .refreshable {
