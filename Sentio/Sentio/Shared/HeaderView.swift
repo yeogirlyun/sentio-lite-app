@@ -50,8 +50,3 @@ struct HeaderHeightKey: PreferenceKey {
         value = max(value, nextValue())
     }
 }
-
-#Preview {
-    HeaderView(title: "Signals", description: "Live signal data and metrics")
-        .previewLayout(.sizeThatFits)
-}

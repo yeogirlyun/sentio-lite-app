@@ -1,5 +1,9 @@
-// filepath: /Users/beejay/repo/sentio/app/Sentio/Sentio/Signals/Signal.swift
-// Model for a Signal
+//
+//  Signal.swift
+//  Sentio
+//
+//  Created by BeeJay on 10/27/25.
+//
 
 import Foundation
 
