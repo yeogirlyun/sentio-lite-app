@@ -2,12 +2,26 @@
 
 import Foundation
 import Combine
+import Network
 
-// Minimal GraphQL response wrapper matching { "data": { "signals": [...] } }
+// GraphQL response wrapper matching { "data": { "Signals": { "edges": [...], "total": ..., "page_info": {...} } } }
 private struct SignalsGraphQLResponse: Codable {
-    struct DataContainer: Codable {
-        let signals: [Signal]
+    struct PageInfo: Codable {
+        let start_cursor: String?
+        let end_cursor: String?
+        let has_next_page: Bool
+        let has_previous_page: Bool
     }
+    
+    struct SignalsContainer: Codable {
+        let edges: [Signal]
+        let page_info: PageInfo
+    }
+    
+    struct DataContainer: Codable {
+        let Signals: SignalsContainer
+    }
+    
     let data: DataContainer?
 }
 
@@ -17,25 +31,35 @@ final class SignalsViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
 
-    // Debug mode allows returning local mock data when the network (GraphQL) is unavailable.
-    @Published var debugMode: Bool = false
-
     // Under-spec: use a configurable endpoint. Replace with your real GraphQL endpoint.
     let endpoint: URL
 
     // Polling task that repeatedly fetches every 60 seconds
     private var pollingTask: Task<Void, Never>?
+    
+    // Network monitor to check connectivity
+    private let monitor = NWPathMonitor()
+    private var isNetworkAvailable = true
 
-    init(endpoint: URL = URL(string: "https://example.com/graphql")!) {
+    init(endpoint: URL = URL(string: "http://192.168.1.28:5000/query")!) {
         self.endpoint = endpoint
-        // Read persisted debug mode (so it survives app restarts)
-        self.debugMode = UserDefaults.standard.bool(forKey: "signals.debug")
+        
+        // Start monitoring network connectivity
+        startNetworkMonitoring()
     }
-
-    /// Persist and apply debug mode.
-    func setDebugMode(_ enabled: Bool) {
-        debugMode = enabled
-        UserDefaults.standard.set(enabled, forKey: "signals.debug")
+    
+    private func startNetworkMonitoring() {
+        monitor.pathUpdateHandler = { [weak self] path in
+            DispatchQueue.main.async {
+                self?.isNetworkAvailable = path.status == .satisfied
+            }
+        }
+        let queue = DispatchQueue(label: "SignalsViewModel.Network")
+        monitor.start(queue: queue)
+    }
+    
+    deinit {
+        monitor.cancel()
     }
 
     func startPolling() {
@@ -66,22 +90,22 @@ final class SignalsViewModel: ObservableObject {
     /// Simple mock data provider used when `debugMode` is enabled.
     private func mockSignals() -> [Signal] {
         let sampleMetrics1: [Metric] = [
-            Metric(key: "RSI (14)", value: 34.2),
-            Metric(key: "BB Proximity", value: 0.95),
-            Metric(key: "Volume Ratio", value: 1.8)
+            Metric(name: "RSI", value: 0.342),
+            Metric(name: "BOLL", value: 0.95),
+            Metric(name: "VOL", value: 0.8)
         ]
 
         let sampleMetrics2: [Metric] = [
-            Metric(key: "RSI (14)", value: 62.1),
-            Metric(key: "Rotation Δ", value: 0.34),
-            Metric(key: "Volume Ratio", value: 0.9)
+            Metric(name: "RSI", value: 0.621),
+            Metric(name: "MOM", value: 0.34),
+            Metric(name: "VOL", value: 0.9)
         ]
 
         return [
-            Signal(id: "tqqq", symbol: Symbol(ticker: "TQQQ", name: "ProShares Ultra QQQ", price: 102.2), confidence: 0.87, type: .StrongBuy, metrics: sampleMetrics1),
-            Signal(id: "spy", symbol: Symbol(ticker: "SPY", name: "SPDR S&P 500 ETF Trust", price: 603.05), confidence: 0.42, type: .Hold, metrics: sampleMetrics2),
-            Signal(id: "qqq", symbol: Symbol(ticker: "QQQ", name: "Invesco QQQ Trust", price: nil), confidence: 0.65, type: .Buy, metrics: sampleMetrics1),
-            Signal(id: "aapl", symbol: Symbol(ticker: "AAPL", name: "Apple Inc.", price: nil), confidence: 0.33, type: .Sell, metrics: sampleMetrics2)
+            Signal(symbol: Symbol(ticker: "TQQQ", name: "ProShares Ultra QQQ", price: 102.2), confidence: 0.87, type: .StrongBuy, metrics: sampleMetrics1),
+            Signal(symbol: Symbol(ticker: "SPY", name: "SPDR S&P 500 ETF Trust", price: 603.05), confidence: 0.42, type: .Hold, metrics: sampleMetrics2),
+            Signal(symbol: Symbol(ticker: "QQQ", name: "Invesco QQQ Trust", price: nil), confidence: 0.65, type: .Buy, metrics: sampleMetrics1),
+            Signal(symbol: Symbol(ticker: "AAPL", name: "Apple Inc.", price: nil), confidence: 0.33, type: .Sell, metrics: sampleMetrics2)
         ]
     }
 
@@ -90,14 +114,9 @@ final class SignalsViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
 
-        // If debug mode is enabled, short-circuit and display local mock data.
-        if debugMode {
-            // Simulate a short network delay so UI shows loading state briefly
-            do {
-                try await Task.sleep(nanoseconds: 150 * 1_000_000) // 150ms
-            } catch {}
-
-            signals = mockSignals()
+        // Check network availability before attempting connection
+        guard isNetworkAvailable else {
+            errorMessage = "Network unavailable. Enable debug mode or check connectivity."
             isLoading = false
             return
         }
@@ -105,17 +124,30 @@ final class SignalsViewModel: ObservableObject {
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Set timeout to prevent hanging on unconnected endpoints
+        request.timeoutInterval = 10.0 // 10 second timeout
 
         let query = """
         query {
-          signals {
-            id
-            symbol
-            confidence
-            type
-            metrics {
-              key
-              value
+          Signals {
+            edges {
+              symbol {
+                ticker
+                name
+                price
+              }
+              confidence
+              metrics {
+                name
+                value
+              }
+            }
+            page_info {
+              start_cursor
+              end_cursor
+              has_next_page
+              has_previous_page
             }
           }
         }
@@ -126,19 +158,24 @@ final class SignalsViewModel: ObservableObject {
             request.httpBody = try JSONSerialization.data(withJSONObject: bodyObject, options: [])
 
             let (data, response) = try await URLSession.shared.data(for: request)
-            // Optional: check HTTP status
             if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
                 errorMessage = "HTTP error: \(http.statusCode)"
                 isLoading = false
                 return
             }
-
+            
             let decoded = try JSONDecoder().decode(SignalsGraphQLResponse.self, from: data)
-            signals = decoded.data?.signals ?? []
+            signals = decoded.data?.Signals.edges ?? []
             isLoading = false
         } catch is CancellationError {
             // Task cancelled — treat as a graceful stop
             isLoading = false
+        } catch let error as URLError where error.code == .timedOut {
+            isLoading = false
+            errorMessage = "Connection timed out. Server may be unavailable."
+        } catch let error as URLError where error.code == .cannotConnectToHost {
+            isLoading = false
+            errorMessage = "Cannot connect to server. Check endpoint URL and network."
         } catch {
             isLoading = false
             errorMessage = error.localizedDescription

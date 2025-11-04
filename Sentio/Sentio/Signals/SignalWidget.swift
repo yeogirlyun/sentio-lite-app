@@ -33,6 +33,58 @@ struct SignalWidget: View {
         }
     }
 
+    // MARK: - Subviews
+
+    @ViewBuilder
+    private var priceSection: some View {
+        if let price = signal.symbol.price {
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("Current Price")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                Text(String(format: "$%.2f", price))
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+            }
+        }
+    }
+
+    private var confidenceSection: some View {
+        VStack(alignment: .trailing, spacing: 2) {
+            Text("Confidence")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            Text(String(format: "%.0f%%", signal.confidence * 100))
+                .font(.headline)
+                .foregroundColor(.primary)
+        }
+    }
+
+    @ViewBuilder
+    private var metricsGrid: some View {
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+            ForEach(signal.metrics, id: \.name) { metric in
+                metricCell(metric)
+            }
+        }
+        .transition(.move(edge: .top).combined(with: .opacity))
+    }
+
+    private func metricCell(_ metric: Metric) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(metric.name.localizedUppercase)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            Text(String(format: "%.2f", metric.value))
+                .font(.subheadline).bold()
+                .foregroundColor(typeColors.fg)
+        }
+        .padding(8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(8)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(signal.symbol.ticker)
@@ -54,29 +106,9 @@ struct SignalWidget: View {
             Spacer().frame(height: 4)
             
             HStack {
-                // Current price if available
-                if let price = signal.symbol.price {
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("Current Price")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                        Text(String(format: "$%.2f", price))
-                            .font(.subheadline)
-                            .foregroundColor(.primary)
-                    }
-                }
-                
+                priceSection
                 Spacer()
-                
-                // Confidence score
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("Confidence")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                    Text(String(format: "%.0f%%", signal.confidence * 100))
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                }
+                confidenceSection
             }
             .frame(maxWidth: .infinity)
 
@@ -109,24 +141,7 @@ struct SignalWidget: View {
                     .cornerRadius(4)
 
                     if isExpanded {
-                        // Two-column responsive grid for metrics
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                            ForEach(signal.metrics, id: \.key) { metric in
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(metric.key.localizedUppercase)
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                    Text(String(format: "%.2f", metric.value))
-                                        .font(.subheadline).bold()
-                                        .foregroundColor(typeColors.fg)
-                                }
-                                .padding(8)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color(.secondarySystemBackground))
-                                .cornerRadius(8)
-                            }
-                        }
-                        .transition(.move(edge: .top).combined(with: .opacity))
+                        metricsGrid
                     }
                 }
             }
@@ -165,8 +180,8 @@ struct SignalWidget: View {
 
 struct SignalWidget_Previews: PreviewProvider {
     static var previews: some View {
-        let sampleMetrics: [Metric] = [Metric(key: "RSI", value: 34.2), Metric(key: "Volume", value: 1.8)]
-        let sample = Signal(id: "1", symbol: Symbol(ticker: "TQQQ", name: "TQQQ", price: nil), confidence: 0.87, type: .StrongBuy, metrics: sampleMetrics)
+        let sampleMetrics: [Metric] = [Metric(name: "RSI", value: 34.2), Metric(name: "Volume", value: 1.8)]
+        let sample = Signal(symbol: Symbol(ticker: "TQQQ", name: "TQQQ", price: nil), confidence: 0.87, type: .StrongBuy, metrics: sampleMetrics)
 
         Group {
             SignalWidget(signal: sample)

@@ -61,7 +61,7 @@ final class PositionsViewModel: ObservableObject {
         return [
             Position(
                 id: UUID().uuidString,
-                symbol: Symbol(ticker: "AAPL", name: "Apple Inc."),
+                symbol: Symbol(ticker: "AAPL", name: "Apple Inc.", price: 154.3),
                 quantity: 10,
                 price: 150.0,
                 target: 155.8,
@@ -72,7 +72,7 @@ final class PositionsViewModel: ObservableObject {
             ),
             Position(
                 id: UUID().uuidString,
-                symbol: Symbol(ticker: "TSLA", name: "Tesla, Inc."),
+                symbol: Symbol(ticker: "TSLA", name: "Tesla, Inc.", price: 699.3),
                 quantity: 5,
                 price: 700.0,
                 target: 720.5,

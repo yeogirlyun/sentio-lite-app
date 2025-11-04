@@ -68,7 +68,7 @@ struct PositionsView: View {
                                 // Use availability checks so we can call .scrollContentBackground on iOS 16+
                                 if #available(iOS 16.0, *) {
                                     List(vm.positions) { position in
-                                        Text("Position for \(position.symbol.ticker)") // Placeholder for PositionWidget
+                                        PositionWidget(position: position)
                                             .listRowSeparator(.hidden)
                                             .listRowBackground(Color.clear)
                                             .listRowInsets(.init(top: 4, leading: 16, bottom: 8, trailing: 16))
@@ -81,7 +81,7 @@ struct PositionsView: View {
                                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 } else {
                                     List(vm.positions) { position in
-                                        Text("Position for \(position.symbol.ticker)") // Placeholder for PositionWidget
+                                        PositionWidget(position: position)
                                             .listRowSeparator(.hidden)
                                             .listRowBackground(Color.clear)
                                             .listRowInsets(.init(top: 4, leading: 16, bottom: 8, trailing: 16))

@@ -105,27 +105,6 @@ struct SignalsView: View {
                 // Header pinned to the top and respecting safe area so it doesn't overlap the status bar.
                 HeaderView(title: "Signals", description: "Live signal data and metrics")
                     .onPreferenceChange(HeaderHeightKey.self) { headerHeight = $0 }
-                    // Small debug toggle button pinned inside the header at top-right.
-                    .overlay(alignment: .topTrailing) {
-                        HStack {
-                            Button {
-                                let new = !vm.debugMode
-                                vm.setDebugMode(new)
-                                Task { await vm.fetchOnce() }
-                            } label: {
-                                Text(vm.debugMode ? "DEBUG ON" : "Debug")
-                                    .font(.caption2).bold()
-                                    .padding(.vertical, 6)
-                                    .padding(.horizontal, 10)
-                                    .background(vm.debugMode ? Color.green.opacity(0.16) : Color.gray.opacity(0.10))
-                                    .foregroundColor(vm.debugMode ? Color.green : Color.primary)
-                                    .clipShape(Capsule())
-                            }
-                            .accessibilityLabel(vm.debugMode ? "Disable debug mode" : "Enable debug mode")
-                        }
-                        .padding(.top, 8)
-                        .padding(.trailing, 16)
-                    }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .toolbar(.hidden, for: .navigationBar)

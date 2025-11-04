@@ -105,9 +105,6 @@ struct Position: Identifiable, Codable, Hashable {
         // signal: optional - accept nested Signal or string id; leave nil if absent
         if let nestedSignal = try? container.decode(Signal.self, forKey: .signal) {
             signal = nestedSignal
-        } else if let signalId = try? container.decode(String.self, forKey: .signal) {
-            // minimal Signal placeholder when only id is provided
-            signal = Signal(id: signalId, symbol: Symbol(ticker: symbol.ticker, name: "", price: nil), confidence: 0.0, type: .Hold, metrics: [])
         } else {
             signal = nil
         }
@@ -183,7 +180,7 @@ struct Position: Identifiable, Codable, Hashable {
         try container.encode(symbol.ticker, forKey: .symbol)
         // Encode signal as id if present
         if let s = signal {
-            try container.encode(s.id, forKey: .signal)
+            try container.encode(s, forKey: .signal)
         }
         // Numeric values
         try container.encode(quantity, forKey: .quantity)

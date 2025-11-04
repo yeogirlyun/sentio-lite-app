@@ -16,24 +16,24 @@ enum SignalType: String, Codable, CaseIterable, Hashable {
 }
 
 struct Metric: Codable, Hashable {
-    let key: String
+    let name: String
     let value: Double
 
     // Provide resilient decoding for `value` which may have been stored as
     // Double, Int, or String in older payloads. Encode always as Double.
     private enum CodingKeys: String, CodingKey {
-        case key
+        case name
         case value
     }
 
-    init(key: String, value: Double) {
-        self.key = key
+    init(name: String, value: Double) {
+        self.name = name
         self.value = value
     }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        key = try container.decode(String.self, forKey: .key)
+        name = try container.decode(String.self, forKey: .name)
 
         // Try decoding as Double, then Int, then String -> Double. Fall back to 0.0 if all fail.
         if let doubleValue = try? container.decode(Double.self, forKey: .value) {
@@ -49,7 +49,7 @@ struct Metric: Codable, Hashable {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(key, forKey: .key)
+        try container.encode(name, forKey: .name)
         try container.encode(value, forKey: .value)
     }
 }
@@ -64,15 +64,14 @@ struct Signal: Identifiable, Codable, Hashable {
     // Custom Codable implementation to allow decoding older data that may not include `metrics`,
     // and to accept `symbol` as either a String ticker or a nested Symbol object.
     private enum CodingKeys: String, CodingKey {
-        case id
         case symbol
         case confidence
         case type
         case metrics
     }
 
-    init(id: String, symbol: Symbol, confidence: Double, type: SignalType, metrics: [Metric] = []) {
-        self.id = id
+    init(symbol: Symbol, confidence: Double, type: SignalType, metrics: [Metric] = []) {
+        self.id = symbol.ticker
         self.symbol = symbol
         self.confidence = confidence
         self.type = type
@@ -81,7 +80,6 @@ struct Signal: Identifiable, Codable, Hashable {
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(String.self, forKey: .id)
 
         // Decode symbol: accept either a full Symbol object or a plain ticker String.
         if let nestedSymbol = try? container.decode(Symbol.self, forKey: .symbol) {
@@ -93,14 +91,16 @@ struct Signal: Identifiable, Codable, Hashable {
             throw DecodingError.keyNotFound(CodingKeys.symbol, context)
         }
 
+        id = symbol.ticker
         confidence = try container.decode(Double.self, forKey: .confidence)
-        type = try container.decode(SignalType.self, forKey: .type)
+        // Type is optional; if missing, default to .Hold
+        type = (try? container.decode(SignalType.self, forKey: .type)) ?? .Hold
         metrics = try container.decodeIfPresent([Metric].self, forKey: .metrics) ?? []
     }
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
+
         // Preserve legacy shape by encoding `symbol` as the ticker string
         try container.encode(symbol.ticker, forKey: .symbol)
         try container.encode(confidence, forKey: .confidence)
