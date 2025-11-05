@@ -12,90 +12,105 @@ struct PositionsView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var headerHeight: CGFloat = 140
     
+    @ViewBuilder
+    private var shimmerView: some View {
+        List(0..<6, id: \.self) { _ in
+            HStack {
+                VStack(alignment: .leading, spacing: 6) {
+                    // Title skeleton
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(height: 14)
+                        .frame(maxWidth: .infinity)
+
+                    // Subtitle/id skeleton
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.gray.opacity(0.25))
+                        .frame(height: 12)
+                        .frame(width: 120)
+                }
+                Spacer()
+                // Value skeleton
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 60, height: 20)
+            }
+            .padding(.vertical, 6)
+            .shimmer(true)
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+        }
+        .listStyle(.insetGrouped)
+        .refreshable {
+            await vm.fetchOnce()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    @ViewBuilder
+    private var errorView: some View {
+        VStack(spacing: 8) {
+            Text("Failed to load signals")
+                .font(.headline)
+            Text(vm.errorMessage ?? "Unknown error")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Button("Retry") {
+                Task { await vm.fetchOnce() }
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+    
+    @ViewBuilder
+    private var unrealizedPnLView: some View {
+        VStack(spacing: 4) {
+            Text("Total Unrealized PnL")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+            
+            Text(String(format: "%@%.2f", vm.totalUnrealizedPnL >= 0 ? "+$" : "-$", abs(vm.totalUnrealizedPnL)))
+                .font(.largeTitle)
+                .bold()
+                .foregroundColor(vm.totalUnrealizedPnL >= 0
+                    ? Color(red: 21/255, green: 87/255, blue: 36/255)
+                    : .red
+                )
+        }
+    }
+    
+    @ViewBuilder
+    private var contentView: some View {
+        List(vm.positions) { position in
+            PositionWidget(position: position)
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                .listRowInsets(.init(top: 4, leading: 8, bottom: 8, trailing: 8))
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .refreshable {
+            await vm.fetchOnce()
+        }
+//        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
     var body: some View {
             NavigationStack {
                 ZStack(alignment: .top) {
                     // Main content is padded from the top so it sits below the header.
-                    VStack(spacing: 0) {
-                        Group {
-                            if vm.isLoading && vm.positions.isEmpty {
-                                // Show skeleton list with shimmer while loading
-                                List(0..<6, id: \.self) { _ in
-                                    HStack {
-                                        VStack(alignment: .leading, spacing: 6) {
-                                            // Title skeleton
-                                            RoundedRectangle(cornerRadius: 4)
-                                                .fill(Color.gray.opacity(0.3))
-                                                .frame(height: 14)
-                                                .frame(maxWidth: .infinity)
-
-                                            // Subtitle/id skeleton
-                                            RoundedRectangle(cornerRadius: 4)
-                                                .fill(Color.gray.opacity(0.25))
-                                                .frame(height: 12)
-                                                .frame(width: 120)
-                                        }
-                                        Spacer()
-                                        // Value skeleton
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .fill(Color.gray.opacity(0.3))
-                                            .frame(width: 60, height: 20)
-                                    }
-                                    .padding(.vertical, 6)
-                                    .shimmer(true)
-                                    .listRowSeparator(.hidden)
-                                    .listRowBackground(Color.clear)
-                                }
-                                .listStyle(.insetGrouped)
-                                .refreshable {
-                                    await vm.fetchOnce()
-                                }
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            } else if let error = vm.errorMessage, vm.positions.isEmpty {
-                                VStack(spacing: 8) {
-                                    Text("Failed to load signals")
-                                        .font(.headline)
-                                    Text(error)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                    Button("Retry") {
-                                        Task { await vm.fetchOnce() }
-                                    }
-                                }
-                                .padding()
-                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                            } else {
-                                // Use availability checks so we can call .scrollContentBackground on iOS 16+
-                                if #available(iOS 16.0, *) {
-                                    List(vm.positions) { position in
-                                        PositionWidget(position: position)
-                                            .listRowSeparator(.hidden)
-                                            .listRowBackground(Color.clear)
-                                            .listRowInsets(.init(top: 4, leading: 16, bottom: 8, trailing: 16))
-                                    }
-                                    .listStyle(.plain)
-                                    .scrollContentBackground(.hidden)
-                                    .refreshable {
-                                        await vm.fetchOnce()
-                                    }
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                } else {
-                                    List(vm.positions) { position in
-                                        PositionWidget(position: position)
-                                            .listRowSeparator(.hidden)
-                                            .listRowBackground(Color.clear)
-                                            .listRowInsets(.init(top: 4, leading: 16, bottom: 8, trailing: 16))
-                                    }
-                                    .listStyle(.plain)
-                                    .refreshable {
-                                        await vm.fetchOnce()
-                                    }
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                }
+                    Group {
+                        if vm.isLoading && vm.positions.isEmpty {
+                            shimmerView
+                        } else if let _ = vm.errorMessage, vm.positions.isEmpty {
+                            errorView
+                        } else {
+                            VStack {
+//                                unrealizedPnLView
+                                contentView
                             }
                         }
-
-                        Spacer(minLength: 0)
                     }
                     // Use the measured header height as top padding so content starts below the header.
                     .padding(.top, headerHeight)

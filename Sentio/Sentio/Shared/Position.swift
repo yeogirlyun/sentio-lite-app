@@ -13,12 +13,10 @@ struct Position: Identifiable, Codable, Hashable {
     let signal: Signal?
     let quantity: Double
     let price: Double
-    let target: Double?
-    let side: String
-    let positionIntent: String
+    let stopLoss: Double?
+    let takeProfit: Double?
     let annotation: String?
     let createdAt: Date
-    let updatedAt: Date
 
     // Convenience initializer for programmatic creation
     init(
@@ -27,24 +25,20 @@ struct Position: Identifiable, Codable, Hashable {
         signal: Signal? = nil,
         quantity: Double,
         price: Double,
-        target: Double? = nil,
-        side: String = "",
-        positionIntent: String = "",
+        stopLoss: Double? = nil,
+        takeProfit: Double? = nil,
         annotation: String? = nil,
-        createdAt: Date = Date(),
-        updatedAt: Date = Date()
+        createdAt: Date = Date()
     ) {
         self.id = id
         self.symbol = symbol
         self.signal = signal
         self.quantity = quantity
         self.price = price
-        self.target = target
-        self.side = side
-        self.positionIntent = positionIntent
+        self.stopLoss = stopLoss
+        self.takeProfit = takeProfit
         self.annotation = annotation
         self.createdAt = createdAt
-        self.updatedAt = updatedAt
     }
 
     // Computed properties useful for UI and summaries
@@ -69,12 +63,10 @@ struct Position: Identifiable, Codable, Hashable {
         case signal
         case quantity
         case price
-        case target
-        case side
-        case positionIntent = "position_intent"
+        case stopLoss = "stop_loss"
+        case takeProfit = "take_profit"
         case annotation
         case createdAt = "created_at"
-        case updatedAt = "updated_at"
     }
 
     init(from decoder: Decoder) throws {
@@ -129,24 +121,8 @@ struct Position: Identifiable, Codable, Hashable {
         }
 
         price = decodeDoubleIfPresent(.price) ?? 0.0
-        target = decodeDoubleIfPresent(.target)
-
-        // side & positionIntent - tolerate different key naming
-        if let s = try? container.decode(String.self, forKey: .side) {
-            side = s
-        } else {
-            side = ""
-        }
-
-        if let pi = try? container.decode(String.self, forKey: .positionIntent) {
-            positionIntent = pi
-        } else if let piAlt = try? container.decodeIfPresent(String.self, forKey: .annotation) {
-            // no-op; keep normal annotation decoding later
-            positionIntent = piAlt
-        } else {
-            positionIntent = ""
-        }
-
+        stopLoss = decodeDoubleIfPresent(.stopLoss)
+        takeProfit = decodeDoubleIfPresent(.takeProfit)
         annotation = try? container.decodeIfPresent(String.self, forKey: .annotation)
 
         // Dates: accept Int (epoch seconds), Double (epoch), or ISO8601 strings. Fall back to Date().
@@ -170,7 +146,6 @@ struct Position: Identifiable, Codable, Hashable {
         }
 
         createdAt = decodeDate(.createdAt)
-        updatedAt = decodeDate(.updatedAt)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -185,14 +160,12 @@ struct Position: Identifiable, Codable, Hashable {
         // Numeric values
         try container.encode(quantity, forKey: .quantity)
         try container.encode(price, forKey: .price)
-        try container.encodeIfPresent(target, forKey: .target)
-        try container.encode(side, forKey: .side)
-        try container.encode(positionIntent, forKey: .positionIntent)
+        try container.encodeIfPresent(stopLoss, forKey: .stopLoss)
+        try container.encodeIfPresent(takeProfit, forKey: .takeProfit)
         try container.encodeIfPresent(annotation, forKey: .annotation)
 
         // Encode dates as ISO8601 strings for readability
         let iso = ISO8601DateFormatter()
         try container.encode(iso.string(from: createdAt), forKey: .createdAt)
-        try container.encode(iso.string(from: updatedAt), forKey: .updatedAt)
     }
 }

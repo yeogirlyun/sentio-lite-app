@@ -10,7 +10,7 @@ import Combine
 
 private struct PositionsGraphQLResponse: Codable {
     struct DataContainer: Codable {
-        let positions: [Position]
+        let Positions: [Position]
     }
     
     let data: DataContainer?
@@ -21,15 +21,12 @@ final class PositionsViewModel: ObservableObject {
     @Published var positions: [Position] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
-    @Published var debugMode: Bool = false
     
     let endpoint: URL
     private var pollingTask: Task<Void, Never>?
     
-    init(endpoint: URL = URL(string: "https://example.com/graphql")!) {
+    init(endpoint: URL = URL(string: "http://192.168.1.28:5000/query")!) {
         self.endpoint = endpoint
-        // Read persisted debug mode (so it survives app restarts)
-        self.debugMode = UserDefaults.standard.bool(forKey: "signals.debug")
     }
     
     func startPolling() {
@@ -57,47 +54,20 @@ final class PositionsViewModel: ObservableObject {
         pollingTask = nil
     }
     
-    func mockPositions() -> [Position] {
-        return [
-            Position(
-                id: UUID().uuidString,
-                symbol: Symbol(ticker: "AAPL", name: "Apple Inc.", price: 154.3),
-                quantity: 10,
-                price: 150.0,
-                target: 155.8,
-                side: "buy",
-                positionIntent: "buy_to_open",
-                createdAt: ISO8601DateFormatter().date(from: "2025-10-27T10:00:00Z")!,
-                updatedAt: ISO8601DateFormatter().date(from: "2025-10-27T10:01:00Z")!
-            ),
-            Position(
-                id: UUID().uuidString,
-                symbol: Symbol(ticker: "TSLA", name: "Tesla, Inc.", price: 699.3),
-                quantity: 5,
-                price: 700.0,
-                target: 720.5,
-                side: "buy",
-                positionIntent: "buy_to_open",
-                createdAt: ISO8601DateFormatter().date(from: "2025-10-15T14:30:00Z")!,
-                updatedAt: ISO8601DateFormatter().date(from: "2025-10-27T10:02:00Z")!
-            )
-        ]
+    var totalUnrealizedPnL: Double {
+        positions.reduce(0.0) { total, position in
+            if let currentPrice = position.symbol.price {
+                let pnlPerShare = currentPrice - position.price
+                return total + (pnlPerShare * position.quantity)
+            } else {
+                return total
+            }
+        }
     }
     
     func fetchOnce() async {
         isLoading = true
         errorMessage = nil
-        
-        // If debug mode is enabled, simulate a short network delay so UI shows loading state briefly
-        if debugMode {
-            do {
-                try await Task.sleep(nanoseconds: 150 * 1_000_000) // 150ms
-            } catch {}
-
-            positions = mockPositions()
-            isLoading = false
-            return
-        }
         
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
@@ -105,9 +75,19 @@ final class PositionsViewModel: ObservableObject {
         
         let query = """
         query {
-          positions {
+          Positions {
             id
-            symbol
+            symbol {
+              ticker
+              name
+              price
+            }
+            quantity
+            price
+            stop_loss
+            take_profit
+            annotation
+            created_at
           }
         }
         """
@@ -124,7 +104,7 @@ final class PositionsViewModel: ObservableObject {
             }
             
             let decoded = try JSONDecoder().decode(PositionsGraphQLResponse.self, from: data)
-            positions = decoded.data?.positions ?? []
+            positions = decoded.data?.Positions ?? []
             isLoading = false
         } catch is CancellationError {
             isLoading = false
