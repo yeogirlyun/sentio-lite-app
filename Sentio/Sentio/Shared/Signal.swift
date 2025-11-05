@@ -57,6 +57,7 @@ struct Metric: Codable, Hashable {
 struct Signal: Identifiable, Codable, Hashable {
     let id: String
     let symbol: Symbol
+    let probability: Double
     let confidence: Double
     let type: SignalType
     let metrics: [Metric]
@@ -65,14 +66,16 @@ struct Signal: Identifiable, Codable, Hashable {
     // and to accept `symbol` as either a String ticker or a nested Symbol object.
     private enum CodingKeys: String, CodingKey {
         case symbol
+        case probability
         case confidence
         case type
         case metrics
     }
 
-    init(symbol: Symbol, confidence: Double, type: SignalType, metrics: [Metric] = []) {
+    init(symbol: Symbol, probability: Double, confidence: Double, type: SignalType, metrics: [Metric] = []) {
         self.id = symbol.ticker
         self.symbol = symbol
+        self.probability = probability
         self.confidence = confidence
         self.type = type
         self.metrics = metrics
@@ -92,6 +95,7 @@ struct Signal: Identifiable, Codable, Hashable {
         }
 
         id = symbol.ticker
+        probability = try container.decode(Double.self, forKey: .probability)
         confidence = try container.decode(Double.self, forKey: .confidence)
         // Type is optional; if missing, default to .Hold
         type = (try? container.decode(SignalType.self, forKey: .type)) ?? .Hold
@@ -103,6 +107,7 @@ struct Signal: Identifiable, Codable, Hashable {
 
         // Preserve legacy shape by encoding `symbol` as the ticker string
         try container.encode(symbol.ticker, forKey: .symbol)
+        try container.encode(probability, forKey: .probability)
         try container.encode(confidence, forKey: .confidence)
         try container.encode(type, forKey: .type)
         try container.encode(metrics, forKey: .metrics)

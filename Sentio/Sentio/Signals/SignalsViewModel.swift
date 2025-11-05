@@ -87,28 +87,6 @@ final class SignalsViewModel: ObservableObject {
         pollingTask = nil
     }
 
-    /// Simple mock data provider used when `debugMode` is enabled.
-    private func mockSignals() -> [Signal] {
-        let sampleMetrics1: [Metric] = [
-            Metric(name: "RSI", value: 0.342),
-            Metric(name: "BOLL", value: 0.95),
-            Metric(name: "VOL", value: 0.8)
-        ]
-
-        let sampleMetrics2: [Metric] = [
-            Metric(name: "RSI", value: 0.621),
-            Metric(name: "MOM", value: 0.34),
-            Metric(name: "VOL", value: 0.9)
-        ]
-
-        return [
-            Signal(symbol: Symbol(ticker: "TQQQ", name: "ProShares Ultra QQQ", price: 102.2), confidence: 0.87, type: .StrongBuy, metrics: sampleMetrics1),
-            Signal(symbol: Symbol(ticker: "SPY", name: "SPDR S&P 500 ETF Trust", price: 603.05), confidence: 0.42, type: .Hold, metrics: sampleMetrics2),
-            Signal(symbol: Symbol(ticker: "QQQ", name: "Invesco QQQ Trust", price: nil), confidence: 0.65, type: .Buy, metrics: sampleMetrics1),
-            Signal(symbol: Symbol(ticker: "AAPL", name: "Apple Inc.", price: nil), confidence: 0.33, type: .Sell, metrics: sampleMetrics2)
-        ]
-    }
-
     /// Performs a single network fetch of signals
     func fetchOnce() async {
         isLoading = true
@@ -137,6 +115,7 @@ final class SignalsViewModel: ObservableObject {
                 name
                 price
               }
+              probability
               confidence
               metrics {
                 name

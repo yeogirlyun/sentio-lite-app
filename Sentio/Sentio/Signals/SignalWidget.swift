@@ -8,28 +8,26 @@ struct SignalWidget: View {
 
     // Track whether the metrics grid is expanded
     @State private var isExpanded: Bool = false
-
-    private var typeLabel: String {
-        // Convert raw value like "strong_buy" to an uppercase label (e.g. "STRONG BUY")
-        signal.type.rawValue.replacingOccurrences(of: "_", with: " ").localizedUppercase
-    }
-
-    // Colors for the type capsule (bg, fg). Chosen to match provided colors for buys and hold,
-    // and logical "danger" colors for sells.
-    private var typeColors: (bg: Color, fg: Color) {
-        switch signal.type {
-        case .StrongBuy, .Buy:
-            // background: #d4edda, text: #155724
-            return (Color(red: 212/255, green: 237/255, blue: 218/255),
-                    Color(red: 21/255, green: 87/255, blue: 36/255))
-        case .Hold:
-            // background: #e2e3e5, text: #383d41
-            return (Color(red: 226/255, green: 227/255, blue: 229/255),
-                    Color(red: 56/255, green: 61/255, blue: 65/255))
-        case .StrongSell, .Sell:
-            // chosen reasonable danger colors (Bootstrap-like): bg #f8d7da, text #721c24
-            return (Color(red: 248/255, green: 215/255, blue: 218/255),
-                    Color(red: 114/255, green: 28/255, blue: 36/255))
+    
+    private var probabilityColor: Color {
+        switch signal.probability {
+            // #DC143C
+            case 0.0..<0.2:
+                return Color(red: 220/255, green: 20/255, blue: 60/255)
+            // #F75270
+            case 0.2..<0.4:
+                return Color(red: 247/255, green: 82/255, blue: 112/255)
+            // #FDEBD0
+            case 0.4..<0.6:
+            return .gray.opacity(0.67)
+            // #3E5F44
+            case 0.6...0.8:
+                return Color(red: 62/255, green: 95/255, blue: 68/255)
+            // #5E936C
+            case 0.8...1.0:
+                return Color(red: 94/255, green: 147/255, blue: 108/255)
+            default:
+                return .gray
         }
     }
 
@@ -49,6 +47,7 @@ struct SignalWidget: View {
         }
     }
 
+    @ViewBuilder
     private var confidenceSection: some View {
         VStack(alignment: .trailing, spacing: 2) {
             Text("Confidence")
@@ -56,7 +55,7 @@ struct SignalWidget: View {
                 .foregroundColor(.secondary)
             Text(String(format: "%.0f%%", signal.confidence * 100))
                 .font(.headline)
-                .foregroundColor(.primary)
+                .foregroundColor(.primary.opacity(signal.confidence >= 0.67 ? 1.0 : 0.75))
         }
     }
 
@@ -70,6 +69,7 @@ struct SignalWidget: View {
         .transition(.move(edge: .top).combined(with: .opacity))
     }
 
+    @ViewBuilder
     private func metricCell(_ metric: Metric) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(metric.name.localizedUppercase)
@@ -77,7 +77,7 @@ struct SignalWidget: View {
                 .foregroundColor(.secondary)
             Text(String(format: "%.2f", metric.value))
                 .font(.subheadline).bold()
-                .foregroundColor(typeColors.fg)
+//                .foregroundColor(typeColors.fg)
         }
         .padding(8)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -159,15 +159,14 @@ struct SignalWidget: View {
         )
         // Move the type label to the card's top-right corner
         .overlay(alignment: .topTrailing) {
-            let colors = typeColors
-            Text(typeLabel)
+            Text(signal.probability >= 0.5 ? "▲" : "▼")
                 .font(.caption2).bold()
                 .lineLimit(1)
                 .minimumScaleFactor(0.65)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(colors.bg)
-                .foregroundColor(colors.fg)
+                .padding(.vertical, 4)
+                .padding(.horizontal, 8)
+                .background(probabilityColor)
+                .foregroundColor(.white)
                 .clipShape(Capsule())
                 .padding(.top, 16)
                 .padding(.trailing, 12)
@@ -181,7 +180,7 @@ struct SignalWidget: View {
 struct SignalWidget_Previews: PreviewProvider {
     static var previews: some View {
         let sampleMetrics: [Metric] = [Metric(name: "RSI", value: 34.2), Metric(name: "Volume", value: 1.8)]
-        let sample = Signal(symbol: Symbol(ticker: "TQQQ", name: "TQQQ", price: nil), confidence: 0.87, type: .StrongBuy, metrics: sampleMetrics)
+        let sample = Signal(symbol: Symbol(ticker: "TQQQ", name: "TQQQ", price: nil), probability: 0.6, confidence: 0.87, type: .StrongBuy, metrics: sampleMetrics)
 
         Group {
             SignalWidget(signal: sample)
