@@ -151,12 +151,15 @@ final class SignalsViewModel: ObservableObject {
             isLoading = false
         } catch let error as URLError where error.code == .timedOut {
             isLoading = false
+            signals = []
             errorMessage = "Connection timed out. Server may be unavailable."
         } catch let error as URLError where error.code == .cannotConnectToHost {
             isLoading = false
+            signals = []
             errorMessage = "Cannot connect to server. Check endpoint URL and network."
         } catch {
             isLoading = false
+            signals = []
             errorMessage = error.localizedDescription
         }
     }
