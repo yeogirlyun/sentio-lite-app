@@ -44,7 +44,7 @@ struct ContentView: View {
                 }
                 .tag(Tab.positions)
 
-            HistoryView()
+            ProfitsView()
                 .tabItem {
                     Label("History", systemImage: "clock.fill")
                 }
