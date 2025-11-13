@@ -20,12 +20,27 @@ private struct ProfitsGraphQLResponse: Codable {
     let data: DataContainer?
 }
 
+struct ProfitLogGraphQLResponse: Codable {
+    struct DataContainer: Codable {
+        let OrderLog: OrderLog
+    }
+    
+    struct OrderLog: Codable {
+        let profit: ProfitSummary
+        let log: [ProfitLog]
+        let orders: [Position]
+    }
+    
+    let data: DataContainer?
+}
+
 @Observable
 @MainActor
 class ViewModel {
     let endpoint: URL
     
     var data: [ProfitSummary] = []
+    var log: ProfitLogGraphQLResponse.OrderLog?
     var isLoading: Bool = false
     var page: PageInfo?
     var error: Error?
@@ -89,8 +104,6 @@ class ViewModel {
                 return
             }
             
-            print("Response Data: \(String(data: responseData, encoding: .utf8) ?? "N/A")")
-            
             let decoded = try JSONDecoder().decode(ProfitsGraphQLResponse.self, from: responseData)
             if after == nil {
                 print("Refreshing data")
@@ -107,6 +120,71 @@ class ViewModel {
             isLoading = false
         } catch {
             isLoading = false
+        }
+    }
+    
+    func getOrderLog(dt: Date) async {
+        // skip loading if self.log already loaded for this date
+        if self.log?.profit.start_time.compare(dt) == .orderedSame {
+            print(">>> skip loading for this date") 
+            return
+        }
+        
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let query = """
+        query {
+          OrderLog(date: "\(ISO8601DateFormatter().string(from: dt))") {
+            profit {
+              id
+              start_time
+              end_time
+              profit
+              trade_count
+              win_rate
+              winning_trades
+              losing_trades
+            }
+            log {
+              time
+              equity
+              invested
+              running_positions
+            }
+            orders {
+              id
+              symbol {
+                ticker
+                name
+              }
+              quantity
+              price
+              created_at
+              profit
+              duration
+            }
+          }
+        }    
+        """
+        
+        let bodyObject: [String: Any] = ["query": query]
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: bodyObject, options: [])
+            let (responseData, response) = try await URLSession.shared.data(for: request)
+            if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
+                print("HTTP error: \(http.statusCode)")
+                error = NSError(domain: "", code: http.statusCode, userInfo: [NSLocalizedDescriptionKey: "HTTP error: \(http.statusCode)"])
+                return
+            }
+            
+            let decoded = try JSONDecoder().decode(ProfitLogGraphQLResponse.self, from: responseData)
+            log = decoded.data?.OrderLog
+        } catch let decodingError as DecodingError {
+            print("Decoding error: \(decodingError)")
+        } catch {
+            print("Error: \(error.localizedDescription)")
         }
     }
 }
