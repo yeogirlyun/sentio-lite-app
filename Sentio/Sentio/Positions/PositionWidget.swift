@@ -19,13 +19,11 @@ struct PositionWidget: View {
                 .lineLimit(1)
                 .layoutPriority(1)
             
-            if !position.symbol.name.isEmpty {
-                Text(String(format: "%.0f shares @ $%.2f", position.quantity, position.price))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                    .layoutPriority(0)
-            }
+            Text(String(format: "%.0f shares @ $%.2f", position.quantity, position.price))
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .lineLimit(1)
+                .layoutPriority(0)
         }
     }
     

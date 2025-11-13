@@ -17,6 +17,8 @@ struct Position: Identifiable, Codable, Hashable {
     let takeProfit: Double?
     let annotation: String?
     let createdAt: Date
+    let profit: Double
+    let duration: UInt
 
     // Convenience initializer for programmatic creation
     init(
@@ -28,7 +30,9 @@ struct Position: Identifiable, Codable, Hashable {
         stopLoss: Double? = nil,
         takeProfit: Double? = nil,
         annotation: String? = nil,
-        createdAt: Date = Date()
+        createdAt: Date = Date(),
+        profit: Double = 0.0,
+        duration: UInt = 0
     ) {
         self.id = id
         self.symbol = symbol
@@ -39,6 +43,8 @@ struct Position: Identifiable, Codable, Hashable {
         self.takeProfit = takeProfit
         self.annotation = annotation
         self.createdAt = createdAt
+        self.profit = profit
+        self.duration = duration
     }
 
     // Computed properties useful for UI and summaries
@@ -67,6 +73,8 @@ struct Position: Identifiable, Codable, Hashable {
         case takeProfit = "take_profit"
         case annotation
         case createdAt = "created_at"
+        case profit
+        case duration
     }
 
     init(from decoder: Decoder) throws {
@@ -146,6 +154,17 @@ struct Position: Identifiable, Codable, Hashable {
         }
 
         createdAt = decodeDate(.createdAt)
+        
+        profit = decodeDoubleIfPresent(.profit) ?? 0.0
+        if let durationUInt = try? container.decode(UInt.self, forKey: .duration) {
+            duration = durationUInt
+        } else if let durationInt = try? container.decode(Int.self, forKey: .duration) {
+            duration = UInt(durationInt)
+        } else if let durationStr = try? container.decode(String.self, forKey: .duration), let parsed = UInt(durationStr) {
+            duration = parsed
+        } else {
+            duration = 0
+        }
     }
 
     func encode(to encoder: Encoder) throws {
@@ -167,5 +186,8 @@ struct Position: Identifiable, Codable, Hashable {
         // Encode dates as ISO8601 strings for readability
         let iso = ISO8601DateFormatter()
         try container.encode(iso.string(from: createdAt), forKey: .createdAt)
+        
+        try container.encode(profit, forKey: .profit)
+        try container.encode(duration, forKey: .duration)
     }
 }
