@@ -186,7 +186,7 @@ struct ProfitDetailsView: View {
                 }
             }
             .padding()
-            .background(Color.primary.opacity(0.06))
+            .background(Color.aliceBlue)
             .cornerRadius(8)
             .padding()
         }

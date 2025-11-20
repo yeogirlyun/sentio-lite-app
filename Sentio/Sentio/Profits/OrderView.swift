@@ -25,10 +25,14 @@ struct OrderView: View {
             let openTime = Calendar.current.date(byAdding: .minute, value: Int(order.duration) * -1, to: order.createdAt)!
             let entryPrice = order.profit.isZero ? 0 : (order.price - (order.profit / Double(order.quantity)))
             
-            Text(String(format: "%@ - %@ (%d min)",
-                        dateFormatter.string(from: openTime),
-                        dateFormatter.string(from: order.createdAt),
-                        order.duration))
+            let durationText = order.duration < 391
+                ? String(format: "%@ - %@ ET (%d min)",
+                         dateFormatter.string(from: openTime),
+                         dateFormatter.string(from: order.createdAt),
+                         order.duration)
+                : String(format: "Closed at %@", dateFormatter.string(from: order.createdAt))
+            
+            Text(durationText)
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .padding(.bottom, 4)
@@ -41,7 +45,10 @@ struct OrderView: View {
                         .lineLimit(1)
                         .layoutPriority(1)
                     
-                    Text(String(format: "%.0f shares • $%.2f → $%.2f", order.quantity, entryPrice, order.price))
+                    Text(String(format: "%.0f shares • $%.2f → $%.2f",
+                                order.quantity,
+                                entryPrice,
+                                order.price))
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .lineLimit(1)

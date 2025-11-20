@@ -17,6 +17,13 @@ struct ProfitLog: Codable, Identifiable, Hashable {
         return time
     }
     
+    var timeInNY: Date {
+        let nyCalendar = Calendar(identifier: .gregorian)
+        var nyComponents = nyCalendar.dateComponents(in: TimeZone(identifier: "America/New_York")!, from: time)
+        nyComponents.timeZone = TimeZone(identifier: "America/New_York")
+        return nyCalendar.date(from: nyComponents) ?? time
+    }
+    
     private enum CodingKeys: String, CodingKey {
         case time
         case equity
@@ -44,7 +51,9 @@ struct ProfitLog: Codable, Identifiable, Hashable {
             }
             if let str = try? container.decode(String.self, forKey: key) {
                 // Try ISO8601 first
-                if let iso = ISO8601DateFormatter().date(from: str) { return iso }
+                if let iso = ISO8601DateFormatter().date(from: str) {
+                    return iso
+                }
                 // Try RFC3339 / custom formats
                 let f = DateFormatter()
                 f.locale = Locale(identifier: "en_US_POSIX")

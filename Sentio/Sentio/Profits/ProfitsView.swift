@@ -43,7 +43,7 @@ struct ProfitsView: View {
                 
                 Spacer()
                 
-                Text(String(format: "%@%.2f", item.profit >= 0 ? "+$" : "-$", abs(item.profit)))
+                Text(item.profit, format: .currency(code: "USD"))
                     .font(.headline)
                     .bold()
                     .foregroundColor(item.profit >= 0 ? .green : .red)
@@ -76,19 +76,27 @@ struct ProfitsView: View {
                                     vm.isLoading = false
                                 }
                             }
-                            .background(Color.primary.opacity(0.06))
-                            .cornerRadius(8)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(Color(.white))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .stroke(Color.black.opacity(0.02), lineWidth: 0.5)
+                            )
                             .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 1)
                             .padding(.horizontal)
                             .onAppear {
                                 let shouldLoadMore = vm.data.last == item && vm.hasNextPage()
                                 if shouldLoadMore {
                                     Task {
-                                        await vm.loadMore()
+                                        await vm.loadMore(after: vm.page?.EndCursor)
                                     }
                                 }
                             }
                     }
+                    
+                    Spacer().frame(height: 12)
                     
                     if vm.isLoading {
                         ProgressView("Loading...")
@@ -112,18 +120,12 @@ struct ProfitsView: View {
                         ProfitDetailsView(date: date, log: vm.log)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
+                    .preferredColorScheme(.light)
                     .frame(maxWidth: .infinity)
                 }
                 .presentationDetents([.medium, .large])
             }
             .toolbar {
-                NavigationLink {
-                    Text("Symbol Filter")
-                } label: {
-                    Image(systemName: "chart.bar.fill")
-                        .font(.caption)
-                }
-                
                 NavigationLink {
                     DatePicker("Select Date", selection: $date, in: dateRange, displayedComponents: .date)
                         .datePickerStyle(.graphical)

@@ -19,7 +19,8 @@ enum Tab: Int, CaseIterable, Identifiable {
 
 struct ContentView: View {
     // Persist selected tab across launches using AppStorage backed by UserDefaults (stores the raw Int)
-    @AppStorage("selectedTab") private var selectedTabRawValue: Int = Tab.signals.rawValue
+    @AppStorage("selectedTab")
+    private var selectedTabRawValue: Int = Tab.signals.rawValue
 
     // Helper binding that converts the stored raw Int into the typed Tab enum for use with TabView
     private var selectedTabBinding: Binding<Tab> {
@@ -56,6 +57,7 @@ struct ContentView: View {
                 }
                 .tag(Tab.about)
         }
+        .colorScheme(.light)
     }
 }
 

@@ -15,6 +15,7 @@ private struct ProfitsGraphQLResponse: Codable {
     struct ProfitsConnection: Codable {
         let edges: [ProfitSummary]
         let page_info: PageInfo
+        let total: Int
     }
     
     let data: DataContainer?
@@ -89,6 +90,7 @@ class ViewModel {
                 has_next_page,
                 has_previous_page
               }
+              total
             }
         }
         """
