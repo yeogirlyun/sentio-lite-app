@@ -46,7 +46,7 @@ struct ProfitsView: View {
                 Text(item.profit, format: .currency(code: "USD"))
                     .font(.headline)
                     .bold()
-                    .foregroundColor(item.profit >= 0 ? .green : .red)
+                    .foregroundColor(item.profit >= 0 ? Color.profit : Color.loss)
             }
             
             Divider().padding(.vertical, 2)
@@ -112,11 +112,11 @@ struct ProfitsView: View {
             }
             .refreshable { await vm.refresh() }
             .navigationTitle("Profits History")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $isSheetPresented) {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 16) {
-                        Spacer().frame(height: 8)
+                        Spacer().frame(height: 12)
                         ProfitDetailsView(date: date, log: vm.log)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }

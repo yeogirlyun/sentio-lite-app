@@ -72,7 +72,7 @@ final class SignalsViewModel: ObservableObject {
 
             while !Task.isCancelled {
                 do {
-                    try await Task.sleep(nanoseconds: 60 * 1_000_000_000) // 60s
+                    try await Task.sleep(nanoseconds: 15 * 1_000_000_000)
                 } catch {
                     // Task cancelled
                     break

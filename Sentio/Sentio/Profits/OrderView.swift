@@ -60,10 +60,7 @@ struct OrderView: View {
                 Text(order.profit, format: .currency(code: "USD"))
                     .font(.headline)
                     .bold()
-                    .foregroundColor(order.profit >= 0
-                        ? .green
-                        : .red
-                    )
+                    .foregroundColor(order.profit >= 0 ? Color.profit : Color.loss)
             }
         }
     }

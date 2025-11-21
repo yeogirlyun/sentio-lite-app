@@ -32,13 +32,10 @@ struct PositionWidget: View {
         if let pnl = position.unrealizedPnL {
             Spacer()
             
-            Text(String(format: "%@%.2f", pnl >= 0 ? "+$" : "-$", abs(pnl)))
+            Text(pnl, format: .currency(code: "USD"))
                 .font(.headline)
                 .bold()
-                .foregroundColor(pnl >= 0
-                    ? Color(red: 21/255, green: 87/255, blue: 36/255)
-                    : .red
-                )
+                .foregroundColor(pnl >= 0 ? Color.profit : Color.loss)
         }
     }
     
@@ -67,17 +64,7 @@ struct PositionWidget: View {
             
             annotationSection
         }
-        // Ensure the card has room to display the symbol and capsule; prevents collapse in lists
-        .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color(.systemBackground))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(Color.black.opacity(0.02), lineWidth: 0.5)
-        )
-        .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 1)
     }
 }

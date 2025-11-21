@@ -13,64 +13,13 @@ struct PositionsView: View {
     @State private var headerHeight: CGFloat = 140
     
     @ViewBuilder
-    private var shimmerView: some View {
-        List(0..<6, id: \.self) { _ in
-            HStack {
-                VStack(alignment: .leading, spacing: 6) {
-                    // Title skeleton
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(height: 14)
-                        .frame(maxWidth: .infinity)
-
-                    // Subtitle/id skeleton
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.gray.opacity(0.25))
-                        .frame(height: 12)
-                        .frame(width: 120)
-                }
-                Spacer()
-                // Value skeleton
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 60, height: 20)
-            }
-            .padding(.vertical, 6)
-            .shimmer(true)
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
-        }
-        .listStyle(.insetGrouped)
-        .refreshable {
-            await vm.fetchOnce()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-    
-    @ViewBuilder
-    private var errorView: some View {
-        VStack(spacing: 8) {
-            Text("Failed to load signals")
-                .font(.headline)
-            Text(vm.errorMessage ?? "Unknown error")
-                .font(.caption)
-                .foregroundColor(.secondary)
-            Button("Retry") {
-                Task { await vm.fetchOnce() }
-            }
-        }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-    }
-    
-    @ViewBuilder
     private var unrealizedPnLView: some View {
         VStack(spacing: 4) {
             Text("Total Unrealized PnL")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             
-            Text(String(format: "%@%.2f", vm.totalUnrealizedPnL >= 0 ? "+$" : "-$", abs(vm.totalUnrealizedPnL)))
+            Text(vm.totalUnrealizedPnL, format: .currency(code: "USD"))
                 .font(.largeTitle)
                 .bold()
                 .foregroundColor(vm.totalUnrealizedPnL >= 0
@@ -78,6 +27,8 @@ struct PositionsView: View {
                     : .red
                 )
         }
+        .frame(maxWidth: .infinity, alignment: .trailing)
+        .padding(12)
     }
     
     @ViewBuilder
@@ -97,50 +48,55 @@ struct PositionsView: View {
     }
     
     var body: some View {
-            NavigationStack {
-                ZStack(alignment: .top) {
-                    // Main content is padded from the top so it sits below the header.
-                    Group {
-                        if vm.isLoading && vm.positions.isEmpty {
-                            shimmerView
-                        } else if let _ = vm.errorMessage, vm.positions.isEmpty {
-                            errorView
-                        } else {
-                            VStack {
-//                                unrealizedPnLView
-                                contentView
-                            }
-                        }
-                    }
-                    // Use the measured header height as top padding so content starts below the header.
-                    .padding(.top, headerHeight)
-
-                    // Header pinned to the top and respecting safe area so it doesn't overlap the status bar.
-                    HeaderView(title: "Positions", description: "Currently active positions")
-                        .onPreferenceChange(HeaderHeightKey.self) { headerHeight = $0 }
+        NavigationStack {
+            
+            if vm.positions.isEmpty {
+                Text("No open positions")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                unrealizedPnLView
+                
+                List(vm.positions) { position in
+                    PositionWidget(position: position)
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 12, bottom: 4, trailing: 12))
+                        .background(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(Color(.white))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(Color.black.opacity(0.02), lineWidth: 0.5)
+                        )
+                        .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 1)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .toolbar(.hidden, for: .navigationBar)
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
             }
-            .navigationBarHidden(true)
-            .onChange(of: scenePhase) {
-                // Use the updated scenePhase value from the environment inside this zero-parameter closure
-                if scenePhase == .active {
-                    vm.startPolling()
-                } else {
-                    vm.stopPolling()
-                }
-            }
-            .onAppear {
-                if scenePhase == .active {
-                    vm.startPolling()
-                }
-            }
-            .onDisappear {
-                // Stop polling when view disappears to avoid unnecessary requests
+        }
+        .navigationTitle("Positions")
+        .navigationBarTitleDisplayMode(.large)
+        .navigationBarHidden(false)
+        .refreshable { await vm.fetchOnce() }
+        .onChange(of: scenePhase) {            
+            if scenePhase == .active {
+                vm.startPolling()
+            } else {
                 vm.stopPolling()
             }
         }
+        .onAppear {
+            if scenePhase == .active {
+                vm.startPolling()
+            }
+        }
+        .onDisappear {
+            vm.stopPolling()
+        }
+    }
 }
 
 #Preview {

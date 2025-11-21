@@ -60,7 +60,7 @@ struct ProfitDetailsView: View {
                 
                 VStack(alignment: .center, spacing: 4) {
                     Text(avgPnL, format: .currency(code: "USD"))
-                        .foregroundColor(avgPnL >= 0 ? .green : .red)
+                        .foregroundColor(avgPnL >= 0 ? Color.profit : Color.loss)
                         .lineLimit(1)
                         .bold()
                     
@@ -76,7 +76,7 @@ struct ProfitDetailsView: View {
                 
                 VStack(alignment: .center, spacing: 4) {
                     Text(pnl, format: .currency(code: "USD"))
-                        .foregroundColor(pnl >= 0 ? .green : .red)
+                        .foregroundColor(pnl >= 0 ? Color.profit : Color.loss)
                         .lineLimit(1)
                         .bold()
                     
